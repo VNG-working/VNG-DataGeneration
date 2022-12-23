@@ -13,13 +13,13 @@ import time
 import pandas as pd
 import json
 import numpy as np
+import random
 import cv2
 import string
 import xml.etree.ElementTree as ET
 from common import *
 from official_id import OfficialID
 import os
-import random
 labels_list = []
 
 
@@ -186,6 +186,72 @@ class SHND(OfficialID):
         self.cursor[0] += self.get_text_length(text, self.normal) + randint(20, 30)
         raw_text = f"Số {randint(0, 1000)} {self.ward_type} {self.ward} {self.district_type} {self.district} {self.province_type} {self.province}"
         text = raw_text
+        self.cursor[1]
+        self.write(text, char_font=self.normal, bold=True)
+        self.get_marker_coord(text, raw_text.split(" "), ["address" for i in range(len(raw_text.split(" ")))], self.normal)
+
+        # Reall
+
+        #name
+        self.cursor[0] = self.mark 
+        self.cursor[1] += randint(100, 110)
+        raw_text = self.mapping[randint(0,2)]
+        text = raw_text
+        self.write(text, char_font=self.normal, ink=randink(True))
+        self.get_marker_coord(text, [raw_text], ["text"], self.normal)
+
+        # actual ho ten
+        self.cursor[0] += self.get_text_length(text, self.normal) + randint(20, 30)
+        name = np.random.choice(self.names)
+        raw_text = name
+        text = raw_text
+        self.write(text, char_font=self.bold, ink=randink(bold=True))
+        field_lst = raw_text.split(" ")
+        self.get_field_coord(text, field_lst, ["name" for i in range(len(field_lst))], self.bold)
+
+        #ngay sinh
+        self.cursor[0] = self.mark
+        self.cursor[1] += self.line_height - randint(20, 30)
+        raw_text = "Năm sinh:"
+        text = raw_text
+        self.write(text, char_font=self.normal, bold=True)
+        field_lst = raw_text.split(" ")
+        self.get_marker_coord(text, field_lst, ["text" for i in range(2)], self.normal)
+
+        # actual ngay sinh
+        self.cursor[0] += self.get_text_length(text, self.normal) + randint(20, 30)
+        raw_text = random_date().split("/")[-1]
+        text = raw_text
+        self.write(text, char_font=self.bold, ink=randink(bold=True))
+        self.get_field_coord(text, [raw_text], ["dob"], self.bold)
+
+        # CMND
+        self.cursor[0] += randint(70, 90)
+        raw_text = "CMND số:"
+        text = raw_text
+        self.write(text, char_font=self.normal, bold=True)
+        self.get_marker_coord(text, raw_text.split(" "), ["text" for i in range(2)], self.normal)
+
+        # actual CMND
+        self.cursor[0] += self.get_text_length(text, self.normal) + randint(20, 30)
+        raw_text = self.id
+        text = raw_text
+        self.write(text, char_font=self.bold, ink=randink(bold=True))
+        self.get_field_coord(text, [raw_text], ["id_number"], self.bold)
+
+        # Usal Address
+        self.cursor[0] = self.mark
+        self.cursor[1] += self.line_height - randint(20, 30)
+        raw_text = "Địa chỉ thường trú:"
+        text = raw_text
+        self.write(text, char_font=self.normal, bold=True)
+        self.get_marker_coord(text, raw_text.split(" "), ["text" for i in range(4)], self.normal)
+
+        # Autual Usal Address
+        self.cursor[0] += self.get_text_length(text, self.normal) + randint(20, 30)
+        raw_text = f"Số {randint(0, 1000)} {self.ward_type} {self.ward} {self.district_type} {self.district} {self.province_type} {self.province}"
+        text = raw_text
+        self.cursor[1]
         self.write(text, char_font=self.normal, bold=True)
         self.get_marker_coord(text, raw_text.split(" "), ["address" for i in range(len(raw_text.split(" ")))], self.normal)
 
@@ -198,8 +264,23 @@ class SHND(OfficialID):
         self.write(text, char_font=self.code_font, bold=True)
         self.get_marker_coord(text, raw_text.split(" "), ["lc_number" for i in range(len(raw_text.split(" ")))], self.code_font)
 
+
     def fake(self):
-        self.fakeMainInfo()            
+        # self.fake_stamp()
+        # self.fake_potrait()
+        self.fakeMainInfo()
+        # if np.random.rand() < 0.4:
+        #     self.fake_BG()
+        # self.fake_glare()
+        # self.fake_blur()
+        # self.fake_logo()
+        # self.fake_sign()
+
+        # if np.random.rand() < 0.8:
+        #     self.vien_trang()
+        # if np.random.rand() < 0.3:
+        #     self.ep_plastic()
+            
         self.fake_general_image()
 
         self.save()
@@ -211,7 +292,7 @@ if __name__ == '__main__':
     while i < 75:
         print("_______________________________________________________________________________________________________________")
         try:
-            faker = SHND(dst = os.getcwd() + "\\data\\shnd\\first\\1user\\",
+            faker = SHND(dst = os.getcwd() + "\\data\\shnd\\first\\2user\\",
                 bg_path = os.getcwd() + "\\bg\\shnd\\first\\page1.png",
                 font_dir = os.getcwd() + "\\fonts\\Times New Roman")
             print(faker.characters)
