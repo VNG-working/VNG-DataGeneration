@@ -289,7 +289,7 @@ class SHND(OfficialID):
 if __name__ == '__main__':
     i = 0
     print(os.getcwd())
-    while i < 75:
+    while i < 300:
         print("_______________________________________________________________________________________________________________")
         try:
             faker = SHND(dst = os.getcwd() + "\\data\\shnd\\first\\2user\\",
