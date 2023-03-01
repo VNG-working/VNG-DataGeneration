@@ -19,9 +19,11 @@ import string
 import xml.etree.ElementTree as ET
 from common import *
 import os
+import skimage.exposure
+import math
+import matplotlib.pyplot as plt
 
 labels_list = []
-
 
 class OfficialID:
     def __init__(self, dst):
@@ -91,25 +93,25 @@ class OfficialID:
         # get third column of self.info as a list
         self.info.iloc[:, 2].tolist()
         self.province = eval(self.info.loc[np.random.randint(n)][9])["province"]
-        print(self.province)
+        # print(self.province)
         assert len(self.province) > 0
         self.province_type = eval(self.info.loc[np.random.randint(n)][9])["province_type"]
-        print('province type: ', self.province_type)
+        # print('province type: ', self.province_type)
         assert(len(self.province_type) > 0)
         self.district = eval(self.info.loc[np.random.randint(n)][9])["district"]
-        print('district: ', self.district)
+        # print('district: ', self.district)
         assert(len(self.district) > 0)
         self.district_type = eval(self.info.loc[np.random.randint(n)][9])["district_type"]
-        print('district_type: ', self.district_type)
+        # print('district_type: ', self.district_type)
         assert(len(self.district_type) > 0)
         self.ward = eval(self.info.loc[np.random.randint(n)][9])["ward"]
-        print('ward: ', self.ward)
+        # print('ward: ', self.ward)
         assert(len(self.ward) > 0)
         self.ward_type = eval(self.info.loc[np.random.randint(n)][9])["ward_type"]
-        print('ward_type: ', self.ward_type)
+        # print('ward_type: ', self.ward_type)
         assert(len(self.ward_type) > 0)
         self.id = self.info.loc[np.random.randint(n)][1]
-        print('id: ', self.id)
+        # print('id: ', self.id)
         assert(len(self.id) > 0)
 
         self.names, self.usual_addresses = get_info()  # địa chỉ thường trú
@@ -937,13 +939,16 @@ class OfficialID:
                 self.draw = ImageDraw.Draw(self.image)
 
     
-    def fake_stamp(self):
+    def fake_stamp(self, xmin, xmax, ymin, ymax, blue = False):
         offset_x = int(np.random.randint(-70, 40))
         offset_y = int(np.random.randint(-40, 40))
 
-        self.stamp_area = [700 + offset_x,  1350 + offset_y, 1000 + offset_x ,  1650 + offset_y]
+        self.stamp_area = [xmin + offset_x,  ymin + offset_y, xmax + offset_x ,  ymax + offset_y]
 
-        stamp_path = np.random.choice(glob.glob("stamp/*.png"))
+        if blue:
+            stamp_path = np.random.choice(glob.glob("rect_stamps/blue*.png"))
+        else:
+            stamp_path = np.random.choice(glob.glob("rect_stamps/red*.png"))
 
         stamp = cv2.imread(stamp_path)
         stamp = random_rotate(stamp)
@@ -958,15 +963,18 @@ class OfficialID:
         mask = np.any((stamp[:,:,1:] < 200),axis= -1)
         mask = np.expand_dims(mask , -1)
 
-        print(mask.shape)
-        print(np.unique(mask))
+        if blue:
+            self.stamp_ink = np.array([0, 0, randint(100, 255)])
+
+        # print(mask.shape)
+        # print(np.unique(mask))
         stamp = mask * list(self.stamp_ink)  * np.random.randint(600, 900) / 1000.
-        print(stamp.shape)
+        # print(stamp.shape)
 
         # cho nao mask=1 thi lay cua stamp
         # cho nao mask=0 thi lay cua anh goc
-        print('stamp shape', stamp.shape)
-        print('mask shape: ', mask.shape)
+        # print('stamp shape', stamp.shape)
+        # print('mask shape: ', mask.shape)
         stamp = stamp * mask + src[self.stamp_area[1] : self.stamp_area[3] , self.stamp_area[0] : self.stamp_area[2]] * (1-mask) 
 
         # find pixel position in mask that has value = 1
@@ -986,14 +994,8 @@ class OfficialID:
         temp = temp.convert('RGB')
         src[self.stamp_area[1] : self.stamp_area[3] , self.stamp_area[0] : self.stamp_area[2]] = np.array(temp)
 
-        
-
         self.image = Image.fromarray(src)
         self.draw = ImageDraw.Draw(self.image)
-
-
-    
-
         
     def fake_finger(self):
 
@@ -1053,17 +1055,6 @@ class OfficialID:
         self.image = Image.fromarray(src)
         self.draw = ImageDraw.Draw(self.image)
 
-
-
-    
-
-
-    
-
-
-
-
-
     def fake_blur(self):
         # blur random area
         if np.random.rand() > 0.6:
@@ -1120,9 +1111,70 @@ class OfficialID:
         
         self.img_height += 2*pad_size
         self.img_width += 2*pad_size
+    
+    def wrinkles_folds_crease(self, crease = False, fold = False):
 
+        # print(f"crease: {crease}")
+        img = np.asarray(self.image).astype("float32") / 255.0
 
-    def fake_general_image(self):
+        hh, ww = img.shape[:2]
+
+        wrinkles = cv2.imread(os.getcwd() + "/wrinkles_folds_crease/QzPO3.jpg",0).astype("float32") / 255.0
+
+        wrinkles = cv2.resize(wrinkles, (ww,hh), fx=0, fy=0)
+
+        # wrinkles = skimage.exposure.rescale_intensity(wrinkles, in_range=(0,1), out_range=(0,1)).astype(np.float32)
+
+        mean = np.mean(wrinkles)
+        shift = mean - 0.4
+        wrinkles = cv2.subtract(wrinkles, shift)
+
+        hh1 = math.ceil(hh/2)
+        ww1 = math.ceil(ww/3)
+        val = math.sqrt(0.2)
+        
+        if fold:
+            grady = np.linspace(-val, val, hh1, dtype=np.float32)
+            gradx = np.linspace(-val, val, ww1, dtype=np.float32)
+            grad1 = np.outer(grady, gradx)
+
+            grad2 = cv2.flip(grad1, 0)
+            grad3 = cv2.flip(grad1, 1)
+            grad4 = cv2.flip(grad1, -1)
+
+            foldx1 = np.hstack([grad1-0.1,grad2,grad3])
+            foldx2 = np.hstack([grad2+0.1,grad3,grad1+0.2])
+            folds = np.vstack([foldx1,foldx2])
+            folds = folds[0:hh, 0:ww]
+
+            wrinkle_folds = cv2.add(wrinkles, folds)
+        else:
+            wrinkle_folds = wrinkles
+
+        if crease:
+            creases = np.full((hh,ww), 0, dtype=np.float32)
+            ww2 = 2*ww1
+            cv2.line(creases, (0,hh1), (ww-1,hh1), 0.25, 1)
+            cv2.line(creases, (ww1,0), (ww1,hh-1),  0.25, 1)
+            cv2.line(creases, (ww2,0), (ww2,hh-1),  0.25, 1)
+            creases = cv2.GaussianBlur(creases, (3,3), 0)
+            wrinkle_folds_creases = cv2.add(wrinkle_folds, creases)
+        else:
+            wrinkle_folds_creases = wrinkle_folds
+
+        thresh = cv2.threshold(wrinkle_folds_creases, 0.7, 1, cv2.THRESH_BINARY)[1]
+        thresh = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR) 
+        thresh_inv = 1-thresh
+
+        wrinkle_folds_creases = cv2.cvtColor(wrinkle_folds_creases,cv2.COLOR_GRAY2BGR) 
+
+        low = 2.0 * img * wrinkle_folds_creases
+        high = 1 - 2.0 * (1-img) * (1-wrinkle_folds_creases)
+        result = ( 255 * (low * thresh_inv + high * thresh) ).clip(0, 255).astype(np.uint8)
+
+        self.image = Image.fromarray(result)
+
+    def fake_general_image(self, add_crease = False, add_fold = False):
         # # zoom image
         # if np.random.rand() > 0.7:
         #     num_crop = np.random.randint(30, 70)
@@ -1137,7 +1189,7 @@ class OfficialID:
         if np.random.rand() > 0:
             from skimage.util import random_noise
             image = np.array(self.image)
-            var = (np.random.normal(0.3, 0.1) /10.) **2
+            var = (np.random.normal(0.3, 0.5) /10.) **2
             noise_img = random_noise(image, mode='gaussian', var=var)
             noise_img = (255*noise_img).astype(np.uint8)
 
@@ -1145,13 +1197,17 @@ class OfficialID:
         
         
         # contrast
-        if np.random.rand() > 0.7:
-            self.image = ImageEnhance.Contrast(self.image).enhance(np.random.normal(1, 0.25))
+        # if np.random.rand() > 0.7:
+        #     self.image = ImageEnhance.Contrast(self.image).enhance(np.random.normal(1, 0.25))
         
         # brightness
-        if np.random.rand() > 0.7:
-            self.image = ImageEnhance.Brightness(self.image).enhance(randint(85, 115)/100.)
+        # if np.random.rand() > 0.7:
+        #     self.image = ImageEnhance.Brightness(self.image).enhance(randint(85, 115)/100.)
 
+        self.image = ImageEnhance.Contrast(self.image).enhance(np.random.normal(1, 0.25))
+        self.image = ImageEnhance.Brightness(self.image).enhance(randint(85, 115)/100.)
+
+        self.wrinkles_folds_crease(crease = add_crease, fold = add_fold)
 
 # if __name__ == '__main__':
 #     i=0
