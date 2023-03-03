@@ -27,8 +27,8 @@ class SHND(OfficialID):
         super().__init__(dst)
         # dst = 'data/test/'
         self.dst = dst
-        # self.img_name = "xuatkhau_{}.jpg".format(np.random.randint(665527))
-        self.img_name = "fake_test.jpg"
+        self.img_name = "xuatkhau_{}.jpg".format(np.random.randint(665527))
+        # self.img_name = "fake_test.jpg"
 
         self.font_scale = np.random.randint(32, 35)
         self.original_font_scale = self.font_scale
@@ -121,7 +121,7 @@ class SHND(OfficialID):
         
         base = (40, 45)
         scale = (25, 35, 45)
-        newline = randint(30, 35)
+        newline = randint(33, 34)
         line = 35
         col_line = randint(5, 10)
         col_ft_line = randint(base[0], base[1])
@@ -170,9 +170,9 @@ class SHND(OfficialID):
         self.cursor[1] += newline
         raw_text = f"Số tờ khai"
         text = raw_text
-        # field_lst = raw_text.split(" ")
+        field_lst = raw_text.split(" ")
         self.write(text, char_font=self.bold, ink=randink(True))
-        self.get_marker_coord(text, [raw_text], ["declaration_number_marker"], self.bold)
+        self.get_marker_coord(text, field_lst, ["declaration_number_marker"]*len(field_lst), self.bold)
 
         self.cursor[0] = self.col_cursor ++ randint(220, 250)
         self.mark = self.cursor[0]
@@ -259,9 +259,10 @@ class SHND(OfficialID):
         self.mark = self.cursor[0]
         self.cursor[1] += newline
         len_cq = randint(8, 10)
-        raw_text = f"Tên cơ quan Hải quan tiếp nhận tờ khai"
+        raw_text = "Tên cơ quan Hải Quan tiếp nhận tờ khai"
         text = raw_text
         field_lst = raw_text.split(" ")
+
         self.write(text, char_font=self.bold, ink=randink(True))
         self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.bold)
 
@@ -280,10 +281,11 @@ class SHND(OfficialID):
         raw_text = "Mã bộ phận xử lí tờ khai"
         text = raw_text
         field_lst = raw_text.split(" ")
+
         self.write(text, char_font=self.bold, ink=randink(True))
         self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.bold)
 
-        self.cursor[0] = self.col_cursor ++ randint(1200, 1210)
+        self.cursor[0] = self.col_cursor ++ randint(1400, 1410)
         self.mark = self.cursor[0]
         raw_text = f"{randint(0, 99)}"
         text = raw_text
@@ -298,9 +300,10 @@ class SHND(OfficialID):
         self.cursor[1] += newline
         raw_text = f"Ngày đăng ký" 
         text = raw_text
+        field_lst = raw_text.split(" ")
         
         self.write(text, char_font=self.bold, ink=randink(True))
-        self.get_marker_coord(text, [raw_text] , ["text"], self.bold)
+        self.get_marker_coord(text, field_lst , ["declaration_date_marker"]*len(field_lst), self.bold)
 
         self.col_cursor = col_ft_line
         self.cursor[0] = self.col_cursor ++ randint(200, 210)
@@ -331,7 +334,7 @@ class SHND(OfficialID):
         self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.bold)
 
         self.col_cursor = col_ft_line
-        self.cursor[0] = self.col_cursor ++ randint(800, 810)
+        self.cursor[0] = self.col_cursor ++ randint(850, 860)
         self.mark = self.cursor[0]
         raw_text = f"{randint(0, 99)}/{randint(0,99)}/{randint(10**3, 10**4)} {randint(0, 99)}:{randint(0,99)}:{randint(0, 99)}"
         text = raw_text
@@ -341,7 +344,7 @@ class SHND(OfficialID):
         self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.normal)
 
         self.col_cursor = col_ft_line
-        self.cursor[0] = self.col_cursor ++ randint(1120, 1130)
+        self.cursor[0] = self.col_cursor ++ randint(1200, 1210)
         self.mark = self.cursor[0]
         raw_text = f"Thời hạn tái nhập/tái xuất"
         text = raw_text
@@ -365,7 +368,7 @@ class SHND(OfficialID):
         field_lst = raw_text.split(" ")
 
         self.write(text, char_font=self.bold, ink=randink(True))
-        self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.bold)
+        self.get_marker_coord(text, field_lst, ["importer_marker"]*len(field_lst), self.bold)
 
         # Ma so thue
         self.col_cursor = col_se_line
@@ -393,7 +396,7 @@ class SHND(OfficialID):
         with open(source_txt, "r", encoding="utf-8") as f:
             lines = f.readlines()
             cty_lst = [x[:-1] for x in lines if "CÔNG TY" in x and "Mã số thuế" not in x]
-            dc_lst = [x[:-1].split(":")[-1] for x in lines if "Địa chỉ" in x]
+            dc_lst = [" ".join(x[:-1].split(":")[-1].replace(",", " ").split(" ")) for x in lines if "Địa chỉ" in x]
         
         # Cong ty
         self.col_cursor = col_se_line
@@ -452,12 +455,12 @@ class SHND(OfficialID):
         self.col_cursor = col_se_line
         self.cursor[0] = self.col_cursor ++ randint(200, 220)
         self.mark = self.cursor[0]
-        raw_text = dc_lst[randint(0, len(dc_lst))]
+        raw_text = dc_lst[randint(0, len(dc_lst))].strip()
         text = raw_text
 
         field_lst = raw_text.split(" ")
         self.write(text, char_font=self.normal, ink=randink(True))
-        self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.normal)
+        self.get_field_coord(text, field_lst, ["text"]*len(field_lst), self.normal)
 
         # sdt
         self.col_cursor = col_se_line
@@ -603,10 +606,10 @@ class SHND(OfficialID):
         self.mark = self.cursor[0]
         raw_text = dc_lst[randint(0, len(dc_lst))].upper().strip()
         text = raw_text
-        print(raw_text)
         field_lst = raw_text.split(" ")
+
         self.write(text, char_font=self.normal, ink=randink(True))
-        self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.normal)
+        self.get_field_coord(text, field_lst, ["text"]*len(field_lst), self.normal)
 
         self.col_cursor = col_se_line
         self.cursor[0] = self.col_cursor ++ col_line
@@ -683,7 +686,7 @@ class SHND(OfficialID):
         field_lst = raw_text.split(" ")
 
         self.write(text, char_font=self.bold, ink=randink(True))
-        self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.bold)
+        self.get_marker_coord(text, field_lst, ["waybill_marker"]*len(field_lst), self.bold)
 
         self.col_cursor = randint(820, 840)   
         self.cursor[0] = self.col_cursor ++ col_line
@@ -888,7 +891,7 @@ class SHND(OfficialID):
         self.col_cursor = randint(820, 840)   
         self.cursor[0] = self.col_cursor ++ col_line
         self.mark = self.cursor[0]
-        raw_text = "Ký hiệu và số hiệu"
+        raw_text = "Ký hiệu và số Hiệu"
         text = raw_text
         field_lst = raw_text.split(" ")
 
@@ -975,7 +978,7 @@ class SHND(OfficialID):
         field_lst = raw_text.split(" ")
 
         self.write(text, char_font=self.bold, ink=randink(True))
-        self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.bold)
+        self.get_marker_coord(text, field_lst, ["invoice_marker"]*len(field_lst), self.bold)
 
         self.col_cursor = col_ft_line   
         self.cursor[0] = self.col_cursor ++ randint(200, 230)
@@ -1348,9 +1351,10 @@ class SHND(OfficialID):
         self.cursor[1] += newline
         raw_text = f"Chi tiết khai trị giá"
         text = raw_text
+        field_lst = raw_text.split(" ")
 
         self.write(text, char_font=self.bold, ink=randink(True))
-        self.get_marker_coord(text, [raw_text], ["text"], self.bold)
+        self.get_marker_coord(text, field_lst, ["text"]*len(field_lst), self.bold)
 
         self.col_cursor = col_fr_line   
         self.cursor[0] = self.col_cursor ++ col_line
@@ -1650,11 +1654,16 @@ class SHND(OfficialID):
         # self.fake_blur()
         # self.fake_logo()
         # self.fake_sign()
-        self.fake_stamp(xmin = 1000, xmax = 1400, ymin = 100, ymax = 300)
-        self.fake_stamp(xmin = 1000, xmax = 1400, ymin = 400, ymax = 600)
-        self.fake_stamp(xmin = 1250, xmax = 1400, ymin = 50, ymax = 200, blue = True)
-        self.fake_stamp(xmin = 1100, xmax = 1250, ymin = 700, ymax = 850, blue = True)
-        self.fake_stamp(xmin = 1500, xmax = 1650, ymin = 800, ymax = 950, blue = True)
+        if randint(0, 2) == 1:
+            self.fake_stamp(xmin = 1000, xmax = 1400, ymin = 100, ymax = 300)
+        if randint(0, 2) == 1:
+            self.fake_stamp(xmin = 1000, xmax = 1400, ymin = 400, ymax = 600)
+        if randint(0, 2) == 1:
+            self.fake_stamp(xmin = 1250, xmax = 1400, ymin = 50, ymax = 200, blue = True)
+        if randint(0, 2) == 1:
+            self.fake_stamp(xmin = 1100, xmax = 1250, ymin = 700, ymax = 850, blue = True)
+        if randint(0, 2) == 1:
+            self.fake_stamp(xmin = 1500, xmax = 1650, ymin = 800, ymax = 950, blue = True)
         # if np.random.rand() < 0.8:
         #     self.vien_trang()
         # if np.random.rand() < 0.3:
@@ -1667,7 +1676,7 @@ class SHND(OfficialID):
 
 if __name__ == '__main__':
     i = 0
-    while i < 1:
+    while i < 1000:
         print("_______________________________________________________________________________________________________________")
         try:
             faker = SHND(dst = os.getcwd() + "\\data_xuatkhau\\",
