@@ -8,7 +8,53 @@ import PIL.ImageFilter as ImageFilter
 from PIL import ImageEnhance
 import numpy as np
 
-def get_text_length(self, text, font: ImageFont.truetype = None) -> int:
+font_scale = 32
+
+source_txt = os.getcwd() + "/ds_cty.txt"
+with open(source_txt, "r", encoding="utf-8") as f:
+    lines = f.readlines()
+    cty_lst = [x[:-1] for x in lines if "CÔNG TY" in x and "Mã số thuế" not in x]
+    dc_lst = [" ".join(x[:-1].split(":")[-1].replace(",", " ").split(" ")) for x in lines if "Địa chỉ" in x]
+
+normal = ImageFont.truetype(
+    os.getcwd() + "/fonts/Arial/ARIAL.ttf", size=font_scale)
+
+# hsd = ImageFont.truetype(
+#     "fonts/Arial/ARIAL.ttf", size=font_scale-20)
+# bold = ImageFont.truetype(
+#     "fonts/Arial/ARIALBD.ttf", size=font_scale+randint(-5, 5))
+# italic = ImageFont.truetype(
+#     "fonts/Arial/ARIALI.ttf", size=font_scale-10)
+# big_bold = ImageFont.truetype(
+#     "fonts/Arial/ARIALBD.ttf", size=font_scale + 10)
+# Bold_Italic = ImageFont.truetype(
+#     "fonts/Arial/ARIALBI.ttf", size=font_scale)
+# code_font = ImageFont.truetype(
+#     "fonts/Arial/ARIAL.ttf", size=font_scale + 20)
+
+# roboto = ImageFont.truetype('fonts/Roboto-Bold.ttf', font_scale + randint(-5, 5))
+# inhoa_1 = np.random.choice([
+#     ImageFont.truetype('fonts/KGNoRegretsSolid.ttf',
+#                         font_scale+5),
+#     ImageFont.truetype(
+#         'fonts/Hand Scribble Sketch Times.otf', font_scale+5)
+# ])
+
+# bsx_font = ImageFont.truetype(
+#     'fonts/Hand Scribble Sketch Times.otf', int(font_scale*2.5))
+# bsx_font_small = ImageFont.truetype(
+#     'fonts/Hand Scribble Sketch Times.otf', font_scale+5)
+
+# inhoa_2 = np.random.choice([
+#     ImageFont.truetype(
+#         'fonts/SourceSerifPro-Semibold.otf', font_scale+5),
+#     ImageFont.truetype(
+#         'fonts/DroidSerif-Regular.ttf', font_scale+5),
+#     ImageFont.truetype(
+#         'fonts/Times-New-Roman-Bold_44652.ttf', font_scale+5),
+# ])
+
+def get_text_length(text, font: ImageFont.truetype = None) -> int:
     if font == None:
         raise Exception("font cannot be None")
 
@@ -19,7 +65,7 @@ def get_text_length(self, text, font: ImageFont.truetype = None) -> int:
 
 def write(
           text: list, 
-          char_font="normal", 
+          font: ImageFont.truetype, 
           ink=None, 
           bold=False, 
           font_size=None, 
@@ -39,17 +85,14 @@ def write(
     Raises:
         Exception: _description_
         Exception: _description_
-        Exception: _description_
 
     Returns:
         _type_: _description_
     """
-    
-    if font_size == None:
-            raise Exception("size cannot be None")
+
     if cursor == None:
             raise Exception("cursor cannot be None")
-    if canvas == None:
+    if canvas.all() == None:
             raise Exception("canvas cannot be None")
 
     if ink is None:
@@ -58,17 +101,15 @@ def write(
         else:
             ink = randink(bold=True)
 
-    font = char_font
-
     cursor = list(cursor)
 
-    while cursor[0] + get_text_length(text, font) > canvas.shape[1]:
+    while cursor[0] + get_text_length(text = text, font = font) > canvas.shape[1]:
         text = text[:-1]
 
-    base_canvas = Image.fromarray(canvas, mode="RGB")
+    base_canvas = Image.fromarray(canvas)
 
-    draw = ImageDraw(base_canvas)
+    draw = ImageDraw.Draw(base_canvas)
 
-    draw.text(cursor, text, font=font, fill=ink)
+    draw.text(cursor, " ".join(text), font=font, fill=ink)
 
     return text, np.asarray(base_canvas)
