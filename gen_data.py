@@ -50,9 +50,15 @@ Tên -> Địa chỉ
 '''
         
 class SubModule:
-    def __init__(self, shape = [200, 200], canvas=None, marker_prob = 0.5, 
-                 marker_font:ImageFont.truetype = None, content_font:ImageFont.truetype = None,
-                 markers = [], content = None, label = None, ink = None):
+    def __init__(self, shape = [200, 200], canvas=None, 
+                 marker_prob = 0.5, 
+                 marker_font:ImageFont.truetype = None, 
+                 content_font:ImageFont.truetype = None,
+                 markers = [], 
+                 content = None, 
+                 label = None, 
+                 ink = None):
+        
         self.canvas = Image.fromarray(canvas) if canvas is not None else Image.fromarray(np.full(shape + (3,), 255, dtype=np.uint8))
         self.fields = []
         self.markers = markers
@@ -65,13 +71,12 @@ class SubModule:
         self.label = label
         self.draw = ImageDraw.Draw(self.canvas)
         self.ink = ink
+        self.default_font_size = 20
 
     def get_shape(self):
         return self.canvas.shape[:2]
     
     def __call__(self):
-        # Random if it has marker or not: 
-        
         text = ""
         
         if np.random.random() < self.marker_prob:
@@ -87,7 +92,7 @@ class SubModule:
             text += divider_text
 
             self.write(font = self.marker_font, text=text)
-            self.get_field_coord(marker_text, [marker_text], ['marker_' + self.label], self.marker_font)
+            self.get_field_coord(text, [marker_text], ['marker_' + self.label], self.marker_font)
         
         # actual name
         content_text = np.random.choice(self.content)
@@ -115,6 +120,7 @@ class SubModule:
             self.write(text=part2, font=self.content_font)
             self.get_field_coord(part2, [part2], [self.label], self.content_font)
         
+        self.cut_canvas_to_roi()
         self.canvas = np.asarray(self.canvas)
     
     def resize(self, new_shape):
@@ -140,6 +146,24 @@ class SubModule:
         part_submodule.texts = texts
         return part_submodule
     
+
+    def cut_canvas_to_roi(self):
+        boxes = np.array([text['box'] for text in self.fields])
+        xmin = np.min(boxes[:, 0])
+        ymin = np.min(boxes[:, 1])
+        xmax = np.max(boxes[:, 2])
+        ymax = np.max(boxes[:, 3])
+        
+        self.canvas = self.canvas.crop((xmin, ymin, xmax, ymax))
+        
+        # recalibrate the coordinates
+        for i, field in enumerate(self.fields):
+            self.fields[i]['box'][0] -= int(xmin)
+            self.fields[i]['box'][1] -= int(ymin)
+            self.fields[i]['box'][2] -= int(xmin)
+            self.fields[i]['box'][3] -= int(ymin)
+
+            
     def write(self, text: str = None, font = None, bold = None):
             """_summary_
 
@@ -359,13 +383,9 @@ class SubModule:
 
                 xmin, ymin, xmax, ymax = widen_box(bb[0], bb[1], bb[2], bb[3], size=self.canvas.size)
                 _field = {}
-                _field["xmin"] = xmin
-                _field["ymin"] = ymin
-                _field["xmax"] = xmax
-                _field["ymax"] = ymax
-                _field["type"] = 'outlier'
+                _field["box"] = [xmin, ymin, xmax, ymax]
+                _field["type"] = 'text'
                 _field["text"] = u"{}".format(word)
-                _field["block_type"] = block_type
                 # print(_field["text"])
                 self.fields.append(_field)
                 idx += n + 1
