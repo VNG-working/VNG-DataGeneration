@@ -1,10 +1,11 @@
 import sys
-sys.path.insert(1, r'C:\Users\chien\VNG-DataGeneration')
+import os
+sys.path.append(os.getcwd())
 
-from gen_data import *
+from SubModule import SubModule
 from common import *
-from content import content
-import cv2
+from contract.sub_modules.content import content as all_content
+from contract.sub_modules.font import *
 
 makers_list = [
     'Add',
@@ -15,7 +16,7 @@ makers_list = [
     'ADDRESS'
 ]
 
-lst_content = content['vn_unsign_add']
+lst_content = all_content['vn_unsign_add'] + all_content['en_com_add']
 
 class Company_Address(SubModule):
     def __init__(self, shape=None, canvas=None, marker_prob=1, down_prob=0.2, marker_font: ImageFont.truetype = None, 
