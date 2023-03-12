@@ -1,15 +1,15 @@
 import os
 
-hint_test = 2000
+hint_test = -1
 
-raw_bank_names_path = os.getcwd() + "/content/raw_bank_names.txt"
-raw_add_path = os.getcwd() + "/content/raw_foreign_address.txt"
-raw_name_abbre_path = os.getcwd() + "/content/raw_foreign_company_names.txt"
-raw_foreign_person_path = os.getcwd() + "/content/raw_foreign_person_names.txt"
+raw_bank_names_path = os.getcwd() + "/content/en_bank_name.txt"
+raw_add_path = os.getcwd() + "/content/en_com_add.txt"
+raw_name_abbre_path = os.getcwd() + "/content/en_com_name_abrre.txt"
+raw_foreign_person_path = os.getcwd() + "/content/en_per_name.txt"
 
-raw_vn_unsign_add_path = os.getcwd() + "/content/raw_vietnamese_company_names.txt"
-raw_vn_com_name_path = os.getcwd() + "/content/raw_vietnamese_company_foreign_form.txt"
-raw_vn_per_name_path = os.getcwd() + "/content/raw_vietnamese_names.txt"
+raw_vn_unsign_add_path = os.getcwd() + "/content/vn_unsign_add.txt"
+raw_vn_com_name_path = os.getcwd() + "/content/vn_com_name.txt"
+raw_vn_per_name_path = os.getcwd() + "/content/vn_per_name.txt"
 
 with open(raw_bank_names_path, "r", encoding="utf-8") as f:
     bank_names = [x[:-1] for x in f.readlines(hint_test)]
@@ -52,9 +52,7 @@ if __name__ == "__main__":
     print(choice(content["vn_com_name"]))
     print(choice(content["vn_per_name"]))
 
-    for key in content:
-        # print(len(content[key]))
-
-        f = open(os.getcwd() + f"/content/{key}.txt", "w")
-        f.writelines(content[key])
-        f.close()
+    # for key in content:
+    #     f = open(os.getcwd() + f"/content/{key}.txt", "w")
+    #     f.writelines([f"{x}\n" for x in content[key]])
+    #     f.close()
