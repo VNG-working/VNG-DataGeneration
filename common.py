@@ -14,12 +14,6 @@ from random import randint
 
 font_scale = 32
 
-source_txt = os.getcwd() + "/ds_cty.txt"
-with open(source_txt, "r", encoding="utf-8") as f:
-    lines = f.readlines()
-    cty_lst = [x[:-1] for x in lines if "CÔNG TY" in x and "Mã số thuế" not in x]
-    dc_lst = [" ".join(x[:-1].split(":")[-1].replace(",", " ").split(" ")) for x in lines if "Địa chỉ" in x]
-
 normal = ImageFont.truetype(
     os.getcwd() + "/fonts/Arial/ARIAL.ttf", size=font_scale)
 

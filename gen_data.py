@@ -50,10 +50,10 @@ Tên -> Địa chỉ
 '''
         
 class SubModule:
-    def __init__(self, size = [200, 200], canvas=None, marker_prob = 0.5, 
+    def __init__(self, shape = [200, 200], canvas=None, marker_prob = 0.5, 
                  marker_font:ImageFont.truetype = None, content_font:ImageFont.truetype = None,
                  markers = [], content = None, label = None, ink = None):
-        self.canvas = Image.fromarray(canvas) if canvas != None else Image.fromarray(np.full(size[::-1] + (3,), 255, dtype=np.uint8))
+        self.canvas = Image.fromarray(canvas) if canvas is not None else Image.fromarray(np.full(shape + (3,), 255, dtype=np.uint8))
         self.fields = []
         self.markers = markers
         self.content = content
@@ -100,29 +100,30 @@ class SubModule:
             # write account name
             self.cursor[0] += self.marker_font.getsize(text)[0]
             self.write(content_text, self.content_font, bold=np.random.choice([False, True]))
-            self.get_field_coord(text, [content_text], [self.label], self.content_font)
+            self.get_field_coord(content_text, [content_text], [self.label], self.content_font)
         else:
             # write account name
             part1, part2 = split_text(content_text)
             ## part 1
             self.cursor[0] += self.marker_font.getsize(text)[0]
             self.cursor[1] += np.random.randint(-5, 2)
-            self.write(text=part1, font=self.marker_font)
-            self.get_field_coord(text, [part1], [self.label], self.content_font)
+            self.write(text=part1, font=self.content_font)
+            self.get_field_coord(part1, [part1], [self.label], self.content_font)
             ## part 2
             self.cursor[0] = self.cursor[0] * np.random.uniform(0.8, 1.2)
             self.cursor[1] += self.marker_font.getsize(part1)[1] + np.random.randint(0, 5)
-            self.write(text=part2, font=self.marker_font)
-            self.get_field_coord(text, [part2], [self.label], self.content_font)
+            self.write(text=part2, font=self.content_font)
+            self.get_field_coord(part2, [part2], [self.label], self.content_font)
         
         self.canvas = np.asarray(self.canvas)
     
     def resize(self, new_shape):
-        boxes = [text['box'] for text in self.texts]
+        boxes = [text['box'] for text in self.fields]
         self.canvas, boxes = resize(new_shape, self.canvas, boxes)
         for i in range(len(boxes)):
-            self.texts[i]['box'] = boxes[i]
+            self.fields[i]['box'] = boxes[i]
         self.shape = self.canvas.shape[:2]
+        print(self.shape)
     
     def get_part(self, x, y):
         '''
@@ -130,11 +131,11 @@ class SubModule:
         '''
         canvas = self.canvas[:y, :x]
         texts = []
-        boxes = [text['box'] for text in self.texts]
+        boxes = [text['box'] for text in self.fields]
         for i, box in enumerate(boxes):
             x1, y1, x2, y2 = box
             if x2 < x and y2 < y: # Remove box outside of the ROI
-                texts.append(self.texts[i])
+                texts.append(self.fields[i])
         part_submodule = SubModule(canvas=canvas)
         part_submodule.texts = texts
         return part_submodule
@@ -168,7 +169,7 @@ class SubModule:
             while self.cursor[0] + self.get_text_length(text = text, font = font)[0] > self.canvas.size[0]:
                 text = text[:-1]
 
-            self.draw.text(self.cursor, " ".join(text), font = font, fill=self.ink)
+            self.draw.text(self.cursor, text=text, font = font, fill=self.ink)
     
     def get_text_length(self, text, font) -> int:
         """_summary_
@@ -295,17 +296,9 @@ class SubModule:
                 # widen box
                 xmin, ymin, xmax, ymax = widen_box(word_bb[0], word_bb[1], word_bb[2], word_bb[3], cut=cut, size=self.canvas.size)
                 _field = {}
-                _field["xmin"] = xmin
-                _field["ymin"] = ymin
-                _field["xmax"] = xmax
-                _field["ymax"] = ymax
+                _field["box"] = [xmin, ymin, xmax, ymax]
                 _field["type"] = fields_list[i]
-                if fields_list[i] == 'chudoc':
-                    print('chudoc here')
                 _field["text"] = u"{}".format(word)
-                _field["block_type"] = block_type
-                # print(_field["text"])            
-                # print('field type: ',fields_list[i])
                 self.fields.append(_field)
 
                 idx += len(word) + 1
@@ -379,9 +372,10 @@ class SubModule:
             line_tl[0] = 120
             line_tl[1] += 58
 
+
 class Module:
-    def __init__(self, size=(600, 600), canvas=None):
-        self.canvas = canvas if canvas is not None else np.ones(size + (3,))
+    def __init__(self, shape=(600, 600), canvas=None):
+        self.canvas = canvas if canvas is not None else np.full(shape + (3,), 255, np.uint8)
         self.submodules = []
 
     def get_shape(self):
@@ -404,13 +398,15 @@ class Module:
         # We have 2 option: Resize submodule or paste a part of submodule
         if x + submodule_shape[1] > module_shape[1] or y + submodule_shape[0] < module_shape[0]:
             if np.random.random() < 0.5:      #Resize
+                print("here")
                 submodule.resize((x2-x, y2-y))
             else:       #Get part
                 submodule = submodule.get_part(x2, y2)               
         
         # Paste submodule and correct the box coordinate
         self.canvas[y:y2, x:x2] = submodule.canvas
-        boxes = [text['box'] for text in submodule.texts]
+        boxes = [text['box'] for text in submodule.fields]
+        print(boxes)
         boxes = mapping(boxes, position)
         for i in range(len(boxes)):
             submodule.texts[i]['box'] = boxes[i]
@@ -419,14 +415,16 @@ class Module:
     
     def __call__(self, submodules:list):
         '''
-        Paste all submodules to modulê
+        Paste all submodules to module
         '''
 
+
+
     def resize(self, new_shape):
-        boxes = [text['box'] for text in self.texts]
+        boxes = [text['box'] for text in self.fields]
         self.canvas, boxes = resize(new_shape, self.canvas, boxes)
         for i in range(len(boxes)):
-            self.texts[i]['box'] = boxes[i]
+            self.fields[i]['box'] = boxes[i]
         self.shape = self.canvas.shape[:2]
 
     def get_part(self, x, y):
@@ -435,13 +433,13 @@ class Module:
         '''
         canvas = self.canvas[:y, :x]
         texts = []
-        boxes = [text['box'] for text in self.texts]
+        boxes = [text['box'] for text in self.fields]
         for i, box in enumerate(boxes):
             x1, y1, x2, y2 = box
             if x2 < x and y2 < y: # Remove box outside of the ROI
-                texts.append(self.texts[i])
+                texts.append(self.fields[i])
         part_submodule = SubModule(canvas=canvas)
-        part_submodule.texts = texts
+        part_submodule.fields = texts
         return part_submodule
 
 # ## Below is examples
