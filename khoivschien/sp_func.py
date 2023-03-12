@@ -1,6 +1,6 @@
 import os, sys
-sys.path.append(os.getcwd())
-from khoivschien.common import *
+# sys.path.append(os.getcwd())
+# from khoivschien.common import *
 import PIL.Image as Image
 import PIL.ImageFont as ImageFont
 import PIL.ImageDraw as ImageDraw
@@ -55,6 +55,18 @@ normal = ImageFont.truetype(
 # ])
 
 def get_text_length(text, font: ImageFont.truetype = None) -> int:
+    """_summary_
+
+    Args:
+        text (_type_): _description_
+        font (ImageFont.truetype, optional): _description_. Defaults to None.
+
+    Raises:
+        Exception: _description_
+
+    Returns:
+        int: _description_
+    """
     if font == None:
         raise Exception("font cannot be None")
 
@@ -91,9 +103,9 @@ def write(
     """
 
     if cursor == None:
-            raise Exception("cursor cannot be None")
+        raise Exception("cursor cannot be None")
     if canvas.all() == None:
-            raise Exception("canvas cannot be None")
+        raise Exception("canvas cannot be None")
 
     if ink is None:
         if not bold:
