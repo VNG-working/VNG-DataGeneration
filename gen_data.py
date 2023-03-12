@@ -88,7 +88,7 @@ class SubModule:
         content_text = random_capitalize(content_text)
         content_text = random_space(content_text)
 
-        if np.random.rand() < self.down_prob or len(content_text.split()) < 3:
+        if np.random.rand() > self.down_prob or len(content_text.split()) < 3:
             # write account name
             self.cursor[0] += self.marker_font.getsize(text)[0]
             self.write(content_text, self.content_font, bold=np.random.choice([False, True]))
