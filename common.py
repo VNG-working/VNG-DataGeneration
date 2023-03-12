@@ -10,6 +10,7 @@ import PIL.ImageFilter as ImageFilter
 from PIL import ImageEnhance
 import string
 import json
+from random import randint
 
 font_scale = 32
 
@@ -22,40 +23,40 @@ with open(source_txt, "r", encoding="utf-8") as f:
 normal = ImageFont.truetype(
     os.getcwd() + "/fonts/Arial/ARIAL.ttf", size=font_scale)
 
-# hsd = ImageFont.truetype(
-#     "fonts/Arial/ARIAL.ttf", size=font_scale-20)
-# bold = ImageFont.truetype(
-#     "fonts/Arial/ARIALBD.ttf", size=font_scale+randint(-5, 5))
-# italic = ImageFont.truetype(
-#     "fonts/Arial/ARIALI.ttf", size=font_scale-10)
-# big_bold = ImageFont.truetype(
-#     "fonts/Arial/ARIALBD.ttf", size=font_scale + 10)
-# Bold_Italic = ImageFont.truetype(
-#     "fonts/Arial/ARIALBI.ttf", size=font_scale)
-# code_font = ImageFont.truetype(
-#     "fonts/Arial/ARIAL.ttf", size=font_scale + 20)
+hsd = ImageFont.truetype(
+    os.getcwd() + "/fonts/Arial/ARIAL.ttf", size=font_scale-20)
+bold = ImageFont.truetype(
+    os.getcwd() + "/fonts/Arial/ARIALBD.ttf", size=font_scale+randint(-5, 5))
+italic = ImageFont.truetype(
+    os.getcwd() + "/fonts/Arial/ARIALI.ttf", size=font_scale-10)
+big_bold = ImageFont.truetype(
+    os.getcwd() + "/fonts/Arial/ARIALBD.ttf", size=font_scale + 10)
+Bold_Italic = ImageFont.truetype(
+    os.getcwd() + "/fonts/Arial/ARIALBI.ttf", size=font_scale)
+code_font = ImageFont.truetype(
+    os.getcwd() + "/fonts/Arial/ARIAL.ttf", size=font_scale + 20)
 
-# roboto = ImageFont.truetype('fonts/Roboto-Bold.ttf', font_scale + randint(-5, 5))
-# inhoa_1 = np.random.choice([
-#     ImageFont.truetype('fonts/KGNoRegretsSolid.ttf',
-#                         font_scale+5),
-#     ImageFont.truetype(
-#         'fonts/Hand Scribble Sketch Times.otf', font_scale+5)
-# ])
+roboto = ImageFont.truetype('fonts/Roboto-Bold.ttf', font_scale + randint(-5, 5))
+inhoa_1 = np.random.choice([
+    ImageFont.truetype(os.getcwd() + '/fonts/KGNoRegretsSolid.ttf',
+                        font_scale+5),
+    ImageFont.truetype(
+        os.getcwd() + '/fonts/Hand Scribble Sketch Times.otf', font_scale+5)
+])
 
-# bsx_font = ImageFont.truetype(
-#     'fonts/Hand Scribble Sketch Times.otf', int(font_scale*2.5))
-# bsx_font_small = ImageFont.truetype(
-#     'fonts/Hand Scribble Sketch Times.otf', font_scale+5)
+bsx_font = ImageFont.truetype(
+    os.getcwd() + '/fonts/Hand Scribble Sketch Times.otf', int(font_scale*2.5))
+bsx_font_small = ImageFont.truetype(
+    os.getcwd() + '/fonts/Hand Scribble Sketch Times.otf', font_scale+5)
 
-# inhoa_2 = np.random.choice([
-#     ImageFont.truetype(
-#         'fonts/SourceSerifPro-Semibold.otf', font_scale+5),
-#     ImageFont.truetype(
-#         'fonts/DroidSerif-Regular.ttf', font_scale+5),
-#     ImageFont.truetype(
-#         'fonts/Times-New-Roman-Bold_44652.ttf', font_scale+5),
-# ])
+inhoa_2 = np.random.choice([
+    ImageFont.truetype(
+        os.getcwd() + '/fonts/SourceSerifPro-Semibold.otf', font_scale+5),
+    ImageFont.truetype(
+        os.getcwd() + '/fonts/DroidSerif-Regular.ttf', font_scale+5),
+    ImageFont.truetype(
+        os.getcwd() + '/fonts/Times-New-Roman-Bold_44652.ttf', font_scale+5),
+])
 
 date2text = {
     '01': 'một',
