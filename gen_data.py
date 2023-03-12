@@ -23,8 +23,8 @@ def mapping(boxes, position):
     '''
     boxes = np.array(boxes) 
     new_boxes = np.copy(boxes)
-    new_boxes[:, 0] = boxes[:, 0] + position[0]
-    new_boxes[:, 1] = boxes[:, 1] + position[1]
+    new_boxes[:, [0, 2]] = boxes[:, [0, 2]] + position[0]
+    new_boxes[:, [1, 3]] = boxes[:, [1, 3]] + position[1]
     return new_boxes
 
 def resize(new_shape, img, boxes):
@@ -42,28 +42,17 @@ def resize(new_shape, img, boxes):
     
     return new_img, new_boxes
 
-'''
-Giả sử mình có 1 tập các sub-module rồi, làm sao để lắp chúng vào mô đun to ?
-Tên và địa chỉ 
-Template 1:
-Tên -> Địa chỉ 
-'''
-        
 class SubModule:
-    def __init__(self, shape = [200, 200], canvas=None, 
-                 marker_prob = 0.5, 
-                 marker_font:ImageFont.truetype = None, 
-                 content_font:ImageFont.truetype = None,
-                 markers = [], 
-                 content = None, 
-                 label = None, 
-                 ink = None):
-        
-        self.canvas = Image.fromarray(canvas) if canvas is not None else Image.fromarray(np.full(shape + (3,), 255, dtype=np.uint8))
+    def __init__(self, shape = [200, 200], canvas=None, marker_prob = 0.5, down_prob=0.2,
+                 marker_font:ImageFont.truetype = None, content_font:ImageFont.truetype = None,
+                 markers = [], content = None, label = None, ink = None):
+        self.canvas =  canvas if canvas is not None else np.full(shape + (3,), 255, dtype=np.uint8)
+        self.canvas = Image.fromarray(self.canvas)
         self.fields = []
         self.markers = markers
         self.content = content
         self.marker_prob = marker_prob
+        self.down_prob = down_prob
         self.in_module_position = (0, 0)
         self.marker_font = marker_font
         self.content_font = content_font
@@ -75,7 +64,7 @@ class SubModule:
 
     def get_shape(self):
         return self.canvas.shape[:2]
-    
+        
     def __call__(self):
         text = ""
         
@@ -99,9 +88,7 @@ class SubModule:
         content_text = random_capitalize(content_text)
         content_text = random_space(content_text)
 
-
-        one_line = True if np.random.rand() < 0.1 or len(content_text.split()) < 3 else False
-        if one_line:
+        if np.random.rand() < self.down_prob or len(content_text.split()) < 3:
             # write account name
             self.cursor[0] += self.marker_font.getsize(text)[0]
             self.write(content_text, self.content_font, bold=np.random.choice([False, True]))
@@ -129,7 +116,6 @@ class SubModule:
         for i in range(len(boxes)):
             self.fields[i]['box'] = boxes[i]
         self.shape = self.canvas.shape[:2]
-        print(self.shape)
     
     def get_part(self, x, y):
         '''
@@ -184,7 +170,7 @@ class SubModule:
                 _type_: _description_
             """
 
-            if self.canvas == None:
+            if self.canvas is None:
                 raise Exception("canvas cannot be None")
 
             if self.ink is None:
@@ -213,7 +199,7 @@ class SubModule:
 
         return font.getsize(text)
 
-    def get_field_coord(self, text, fields, fields_list=[], font=None, poi=False, cursor=None, block_type='', cut=True):
+    def get_field_coord(self, text, fields, fields_list=[], font=None, poi=False, cursor=None, cut=True):
         """
             text = "Ba Le thi mai linh"
             fields = ["ba", "le thi mai linh"]
@@ -236,12 +222,9 @@ class SubModule:
         for i, field in enumerate(fields):
             field = str(field)
             words = field.split(" ")
-            # if poi:
-            #     print(words)
-            
+
             # A-B gộp lại làm 1 box
             if '-' in words:
-                # print(words)
                 indices = [i for i, x in enumerate(words) if x == "-"]
                 for idx in sorted(indices, reverse=True):
                     # concat text before and after '-'
@@ -254,16 +237,6 @@ class SubModule:
                 continue
             else:
                 start = text.index(field, idx2search) # idx dau tien cuar field trong text
-
-                # prevent more than one occurences of a field in 1 line
-                # import re
-                # field_idx_ls = [m.start() for m in re.finditer(field, text)]       
-                # if len(field_idx_ls) == 1:
-                #     start = field_idx_ls[0]
-                # else:
-                #     return -1
-
-            # print(text.split(" "))
 
             end = start + len(field)  # idx cuoi cung cuar field trong text
             idx2search = start + len(field)
@@ -292,30 +265,24 @@ class SubModule:
 
                 word_bb_start = self.draw.textbbox(
                     (bb[0], bb[1]), field[:word_index], font)  # bb cua phan truoc word trong field
-
                 
                 word_bb = self.draw.textbbox(
                     (word_bb_start[2], cursor[1]), word, font)  # bb cua word trong field
                 
-                if True:
-                    # prevent loi ra le phai
-                    flag_loi_ra_le_phai = False
-                    while word_bb[2] - get_last_length(word, font) // 4 > self.canvas.size[0]:
-                        flag_loi_ra_le_phai = True
-                        print('word hit deleted: ', word)
-                        word = word[:-1]
+                # prevent loi ra le phai
+                flag_loi_ra_le_phai = False
+                while word_bb[2] - get_last_length(word, font) // 4 > self.canvas.size[0]:
+                    flag_loi_ra_le_phai = True
+                    print('word hit deleted: ', word)
+                    word = word[:-1]
 
-                        word_bb = self.draw.textbbox(
-                            (word_bb_start[2], cursor[1]), word, font)  # bb cua word trong field
-                    
-                    
-                    # prevent lot xuong duoi
-                    if word_bb[3] - get_text_height(word, font) // 5 > self.canvas.size[1]:
-                        continue
-
-                # self.xmax = max(self.xmax, word_bb[2])
-                # self.xmin = min(self.xmin, word_bb[0])
-                # self.ymax = max(self.ymax, word_bb[3]) 
+                    word_bb = self.draw.textbbox(
+                        (word_bb_start[2], cursor[1]), word, font)  # bb cua word trong field
+                
+                
+                # prevent lot xuong duoi
+                if word_bb[3] - get_text_height(word, font) // 5 > self.canvas.size[1]:
+                    continue
 
                 # widen box
                 xmin, ymin, xmax, ymax = widen_box(word_bb[0], word_bb[1], word_bb[2], word_bb[3], cut=cut, size=self.canvas.size)
@@ -332,11 +299,11 @@ class SubModule:
                     break
 
         # print('outlier: ', outlier)
-        self.get_outlier_coord(outlier, text, font, cursor=cursor, block_type=block_type)
+        self.get_outlier_coord(outlier, text, font, cursor=cursor)
 
         return 0
     
-    def get_outlier_coord(self, outlier, text, font=None, cursor=None, block_type=''):
+    def get_outlier_coord(self, outlier, text, font=None, cursor=None):
         # sau khi get hết các field trong 1 line thì các chữ còn lại là outlier => get outlier
         if cursor == None:
             cursor = self.cursor
@@ -352,7 +319,6 @@ class SubModule:
             words = line.split(" ")
             text_line = text_lines[i]
 
-            # print(words)
             idx = 0
             for word in words:
                 n = len(word)
@@ -360,38 +326,24 @@ class SubModule:
                     idx += n
                     continue
 
-                # print(text_line )
-                # print(word)
-
                 start = text_line.index(word, idx)
 
                 end = start + n
                 text_bb = self.draw.textbbox(
                     cursor, text_line[:start], font)
-                # bb_end =  self.get_text_length(text_line[:end] , font)
-                # if font == self.Big_Bold:
-                #     bb = [line_tl[0] + bb_start - 6 , line_tl[1] - 3 , line_tl[0]  + bb_end,line_tl[1] + line_width + 65]
-                # else:
-                #     bb = [line_tl[0] + bb_start - 6 , line_tl[1] - 3 , line_tl[0]  + bb_end,line_tl[1] + line_width + 20]
 
                 bb = self.draw.textbbox(
                     (text_bb[2], cursor[1]), word, font)
-                # self.draw.rectangle(bb , outline = "blue")
-                # self.xmax = max(self.xmax, bb[2])
-                # self.xmin = min(self.xmin, bb[0])
-
 
                 xmin, ymin, xmax, ymax = widen_box(bb[0], bb[1], bb[2], bb[3], size=self.canvas.size)
                 _field = {}
                 _field["box"] = [xmin, ymin, xmax, ymax]
                 _field["type"] = 'text'
                 _field["text"] = u"{}".format(word)
-                # print(_field["text"])
                 self.fields.append(_field)
                 idx += n + 1
             line_tl[0] = 120
             line_tl[1] += 58
-
 
 class Module:
     def __init__(self, shape=(600, 600), canvas=None):
@@ -400,6 +352,12 @@ class Module:
 
     def get_shape(self):
         return self.canvas.shape[:2]
+    
+    def get_fields(self):
+        fields = []
+        for submodule in self.submodules:
+            fields += list(submodule.fields)
+        return fields
 
     def __paste__(self, submodule:SubModule, position:list):
         '''
@@ -416,20 +374,18 @@ class Module:
 
         # If submodule has bigger than x or y or both axis of module
         # We have 2 option: Resize submodule or paste a part of submodule
-        if x + submodule_shape[1] > module_shape[1] or y + submodule_shape[0] < module_shape[0]:
-            if np.random.random() < 0.5:      #Resize
-                print("here")
-                submodule.resize((x2-x, y2-y))
+        if x + submodule_shape[1] > module_shape[1] or y + submodule_shape[0] > module_shape[0]:
+            if np.random.random() < 0:      #Resize
+                submodule.resize((y2-y, x2-x))
             else:       #Get part
-                submodule = submodule.get_part(x2, y2)               
+                submodule.get_part(x2-x, y2-y)
         
         # Paste submodule and correct the box coordinate
         self.canvas[y:y2, x:x2] = submodule.canvas
         boxes = [text['box'] for text in submodule.fields]
-        print(boxes)
         boxes = mapping(boxes, position)
         for i in range(len(boxes)):
-            submodule.texts[i]['box'] = boxes[i]
+            submodule.fields[i]['box'] = boxes[i]
         submodule.in_module_position = position
         self.submodules.append(submodule)
     
@@ -438,8 +394,6 @@ class Module:
         Paste all submodules to module
         '''
 
-
-
     def resize(self, new_shape):
         boxes = [text['box'] for text in self.fields]
         self.canvas, boxes = resize(new_shape, self.canvas, boxes)
@@ -447,32 +401,3 @@ class Module:
             self.fields[i]['box'] = boxes[i]
         self.shape = self.canvas.shape[:2]
 
-    def get_part(self, x, y):
-        '''
-            Get a part of canvas within (0, x) and (0, y) 
-        '''
-        canvas = self.canvas[:y, :x]
-        texts = []
-        boxes = [text['box'] for text in self.fields]
-        for i, box in enumerate(boxes):
-            x1, y1, x2, y2 = box
-            if x2 < x and y2 < y: # Remove box outside of the ROI
-                texts.append(self.fields[i])
-        part_submodule = SubModule(canvas=canvas)
-        part_submodule.fields = texts
-        return part_submodule
-
-# ## Below is examples
-
-# class Seller(Module):
-#     def __init__(self, size=(600, 600), canvas=None):
-#         super().__init__(size, canvas)
-    
-#     def __call__(self, company_name, company_address, phone, fax, tax,
-#                  account_number, represented_name, represented_position,
-#                  account_name, bank_name, swift_code):
-#         '''
-#         Should list all submodule may appear in module for not be missed
-#         '''
-#         # We already knew that company name and company address always on top
-#         # assume
