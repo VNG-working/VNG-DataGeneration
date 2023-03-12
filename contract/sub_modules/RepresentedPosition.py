@@ -9,14 +9,15 @@ from PIL import Image
 
 class RepresentedPosition(SubModule):
     def __init__(self, shape=(300, 900), canvas=None, 
-                 marker_prob=1, 
+                 marker_prob=1,
+                 down_prob=0.2,
                  marker_font: ImageFont.truetype = None, 
                  content_font: ImageFont.truetype = None, 
                  markers=None, 
                  content=None, 
                  label='bank_name', 
                  ink=None):
-        super().__init__(shape, canvas, marker_prob, marker_font, content_font, markers, content, label, ink)
+        super().__init__(shape, canvas, marker_prob, down_prob, marker_font, content_font, markers, content, label, ink)
 
         self.markers = [
             "Position",

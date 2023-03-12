@@ -924,3 +924,32 @@ def widen_box(xmin, ymin, xmax, ymax, factor=1.1, cut=True, size = None):
 
     # print(xmin , ymin , xmax , ymax)
     return xmin, ymin, xmax, ymax
+
+# luu toa do cac box ra file json
+def to_json(fp, fields, shape):
+    h, w = shape[:2]
+    json_dicts = {'shapes': [], 'imagePath': fp.split('/')[-1].replace('.json', '.jpg'),
+                    'imageData': None, 'imageHeight': h, 'imageWidth': w}
+
+    for field in fields:
+        box = field['box']
+        tl = [box[0], box[1]]
+        tr = [box[2], box[1]]
+        br = [box[2], box[3]]
+        bl = [box[0], box[3]]
+
+        if tl[0] > w or tl[1] > h:
+            continue
+
+        coords = [tl, tr, br, bl]
+        # if field["type"] != "outlier" and "marker" not in field["type"]:
+        #     type = "text"
+        # else:type = field["type"]
+        type = field["type"]
+
+        json_dicts["shapes"].append(
+            {'label': type, "text": field["text"], 'points': coords, 'shape_type': 'polygon', 'flags': {}})
+
+    # print(json_path)
+    with open(fp, 'w', encoding='utf-8') as f:
+        json.dump(json_dicts, f)
