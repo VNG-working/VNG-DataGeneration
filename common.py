@@ -942,9 +942,6 @@ def to_json(fp, fields, shape):
             continue
 
         coords = [tl, tr, br, bl]
-        # if field["type"] != "outlier" and "marker" not in field["type"]:
-        #     type = "text"
-        # else:type = field["type"]
         type = field["type"]
 
         json_dicts["shapes"].append(
