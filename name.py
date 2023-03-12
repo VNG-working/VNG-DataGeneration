@@ -1,4 +1,4 @@
-from gen_data import *
+from SubModule import *
 from common import *
 import cv2 as cv
 

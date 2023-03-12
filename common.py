@@ -950,3 +950,33 @@ def to_json(fp, fields, shape):
     # print(json_path)
     with open(fp, 'w', encoding='utf-8') as f:
         json.dump(json_dicts, f)
+
+def mapping(boxes, position):
+    '''
+    Args: 
+        boxes: List boxes of smaller module
+        position: (x, y) position where to paste module ==> top-left
+    Output: 
+        list boxes in larger coordinate space
+    Note that function not change order of box in list
+    '''
+    boxes = np.array(boxes) 
+    new_boxes = np.copy(boxes)
+    new_boxes[:, [0, 2]] = boxes[:, [0, 2]] + position[0]
+    new_boxes[:, [1, 3]] = boxes[:, [1, 3]] + position[1]
+    return new_boxes
+
+def resize(new_shape, img, boxes):
+    new_h, new_w = new_shape
+    h, w = img.shape[:2]
+    scale_x, scale_y = new_w / h, new_h / h
+    new_img = cv2.resize(img, (new_w, new_h))
+    if isinstance(boxes, list):
+        new_boxes = [[x1*scale_x, y1*scale_y, x2*scale_x, y2*scale_y] for (x1, y1, x2, y2) in boxes]
+    else: #numpy array
+        new_boxes = np.copy(boxes)
+        new_boxes[:, 0] = boxes[:, 0] * scale_x
+        new_boxes[:, 1] = boxes[:, 1] * scale_y
+        new_boxes = new_boxes.tolist()
+    
+    return new_img, new_boxes

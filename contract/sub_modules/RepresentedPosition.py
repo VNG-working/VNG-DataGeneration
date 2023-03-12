@@ -1,7 +1,7 @@
 import sys
 import os
 sys.path.append(os.getcwd())
-from gen_data import SubModule
+from SubModule import SubModule
 from common import *
 from PIL import Image
 

@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from gen_data import SubModule
+from SubModule import SubModule
 from common import *
 from contract.sub_modules.font import *
 from faker import Faker
