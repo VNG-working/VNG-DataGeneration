@@ -27,9 +27,7 @@ class AccountName(SubModule):
             'beneficiary\'s name',
             'beneficiary\'s account name',
         ]
-
-        self.content = all_content["en_bank_name"]
-
+        self.content = all_content["en_com_name_abrre"] + all_content['vn_com_name']
         self.marker_font = normal
         self.content_font = normal
 

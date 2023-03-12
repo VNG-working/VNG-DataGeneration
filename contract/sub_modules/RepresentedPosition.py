@@ -3,7 +3,9 @@ import os
 sys.path.append(os.getcwd())
 from SubModule import SubModule
 from common import *
+from contract.sub_modules.font import *
 from PIL import Image
+from contract.sub_modules.content import content as all_content
 
 class RepresentedPosition(SubModule):
     def __init__(self, shape=(300, 900), canvas=None, 
@@ -26,14 +28,10 @@ class RepresentedPosition(SubModule):
             "Representative",
             "Representator"
         ]
+        self.content = all_content['pos']
+        self.marker_font = normal
+        self.content_font = normal
 
-        self.content = [
-            'boss',
-            'manager',
-        ]
-
-        self.marker_font = ImageFont.truetype('/home/fiores/Desktop/VNG/VNG-DataGeneration/fonts/Times New Roman/times new roman.ttf', self.default_font_size)
-        self.content_font = ImageFont.truetype('/home/fiores/Desktop/VNG/VNG-DataGeneration/fonts/Times New Roman/times new roman.ttf', self.default_font_size)
 
 if __name__ == '__main__':
     t = RepresentedPosition(shape=(300, 900))

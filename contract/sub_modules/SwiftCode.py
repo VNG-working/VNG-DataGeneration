@@ -33,7 +33,6 @@ class SwiftCode(SubModule):
 
         random_code = faker.swift() if np.random.rand() < 0.9 else faker.swift(length=11, primary=True)
         self.content = [random_code]
-
         self.marker_font = normal
         self.content_font = normal
 
