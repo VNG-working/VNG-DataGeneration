@@ -1,6 +1,6 @@
 import PIL.ImageFont as ImageFont
 
-font_scale = 10
+font_scale = 20
 
 normal = ImageFont.truetype(
     "fonts/time_new_roman.ttf", size=font_scale)
