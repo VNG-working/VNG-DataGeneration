@@ -1,8 +1,6 @@
 import sys
-sys.path.append('/home/fiores/Desktop/VNG/VNG-DataGeneration')
-
-# from ...gen_data import SubModule
-# from ...common import *
+import os
+sys.path.append(os.getcwd())
 from gen_data import SubModule
 from common import *
 from PIL import Image

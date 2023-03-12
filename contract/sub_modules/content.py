@@ -11,6 +11,8 @@ raw_vn_unsign_add_path = os.getcwd() + "/content/vn_unsign_add.txt"
 raw_vn_com_name_path = os.getcwd() + "/content/vn_com_name.txt"
 raw_vn_per_name_path = os.getcwd() + "/content/vn_per_name.txt"
 
+position_path = os.getcwd() + "/content/all_position.txt"
+
 with open(raw_bank_names_path, "r", encoding="utf-8") as f:
     bank_names = [x[:-1] for x in f.readlines(hint_test)]
 
@@ -32,6 +34,9 @@ with open(raw_vn_com_name_path, "r", encoding="utf-8") as f:
 with open(raw_vn_per_name_path, "r", encoding="utf-8") as f:
     vn_per_name = [x[:-1] for x in f.readlines(hint_test)]
 
+with open(position_path, "r", encoding="utf-8") as f:
+    pos = [x[:-1] for x in f.readlines(hint_test)]
+
 content = {
     "en_bank_name" : bank_names,
     "en_com_add" : com_add,
@@ -39,7 +44,8 @@ content = {
     "en_per_name" : per_name,
     "vn_unsign_add" : vn_unsign_add,
     "vn_com_name" : vn_com_name,
-    "vn_per_name" : vn_per_name
+    "vn_per_name" : vn_per_name,
+    "pos" : pos
 }
 
 if __name__ == "__main__":
@@ -51,6 +57,7 @@ if __name__ == "__main__":
     print(choice(content["vn_unsign_add"]))
     print(choice(content["vn_com_name"]))
     print(choice(content["vn_per_name"]))
+    print(choice(content["pos"]))
 
     # for key in content:
     #     f = open(os.getcwd() + f"/content/{key}.txt", "w")
