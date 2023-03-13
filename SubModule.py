@@ -15,10 +15,10 @@ from PIL import ImageEnhance
 
 
 class SubModule:
-    def __init__(self, shape = [200, 200], canvas=None, marker_prob = 0.5, down_prob=0.2,
+    def __init__(self, shape = [1000, 1000], marker_prob = 0.5, down_prob=0.2,
                  marker_font:ImageFont.truetype = None, content_font:ImageFont.truetype = None,
                  markers = [], content = None, label = None, ink = None):
-        self.canvas =  canvas if canvas is not None else np.full(shape + (3,), 255, dtype=np.uint8)
+        self.canvas =  np.full(shape + (3,), 255, dtype=np.uint8)
         self.canvas = Image.fromarray(self.canvas)
         self.fields = []
         self.markers = markers
@@ -86,6 +86,7 @@ class SubModule:
         
         self.cut_canvas_to_roi()
         self.canvas = np.asarray(self.canvas)
+        return self
     
     def resize(self, new_shape):
         boxes = [text['box'] for text in self.fields]
@@ -200,15 +201,15 @@ class SubModule:
             field = str(field)
             words = field.split(" ")
 
-            # A-B gộp lại làm 1 box
-            if '-' in words:
-                indices = [i for i, x in enumerate(words) if x == "-"]
-                for idx in sorted(indices, reverse=True):
-                    # concat text before and after '-'
-                    words[idx-1] = words[idx-1] + ' ' + '-' + ' ' + words[idx+1]
-                    # remove
-                    del words[idx+1]
-                    del words[idx]
+            # # A-B gộp lại làm 1 box
+            # if '-' in words:
+            #     indices = [i for i, x in enumerate(words) if x == "-"]
+            #     for idx in sorted(indices, reverse=True):
+            #         # concat text before and after '-'
+            #         words[idx-1] = words[idx-1] + ' ' + '-' + ' ' + words[idx+1]
+            #         # remove
+            #         del words[idx+1]
+            #         del words[idx]
 
             if field not in text:
                 continue

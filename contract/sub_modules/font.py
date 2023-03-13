@@ -1,5 +1,6 @@
 import PIL.ImageFont as ImageFont
 
+
 font_scale = 20
 
 normal = ImageFont.truetype(
