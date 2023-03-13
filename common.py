@@ -924,3 +924,59 @@ def widen_box(xmin, ymin, xmax, ymax, factor=1.1, cut=True, size = None):
 
     # print(xmin , ymin , xmax , ymax)
     return xmin, ymin, xmax, ymax
+
+# luu toa do cac box ra file json
+def to_json(fp, fields, shape):
+    h, w = shape[:2]
+    json_dicts = {'shapes': [], 'imagePath': fp.split('/')[-1].replace('.json', '.jpg'),
+                    'imageData': None, 'imageHeight': h, 'imageWidth': w}
+
+    for field in fields:
+        box = field['box']
+        tl = [box[0], box[1]]
+        tr = [box[2], box[1]]
+        br = [box[2], box[3]]
+        bl = [box[0], box[3]]
+
+        if tl[0] > w or tl[1] > h:
+            continue
+
+        coords = [tl, tr, br, bl]
+        type = field["type"]
+
+        json_dicts["shapes"].append(
+            {'label': type, "text": field["text"], 'points': coords, 'shape_type': 'polygon', 'flags': {}})
+
+    # print(json_path)
+    with open(fp, 'w', encoding='utf-8') as f:
+        json.dump(json_dicts, f)
+
+def mapping(boxes, position):
+    '''
+    Args: 
+        boxes: List boxes of smaller module
+        position: (x, y) position where to paste module ==> top-left
+    Output: 
+        list boxes in larger coordinate space
+    Note that function not change order of box in list
+    '''
+    boxes = np.array(boxes) 
+    new_boxes = np.copy(boxes)
+    new_boxes[:, [0, 2]] = boxes[:, [0, 2]] + position[0]
+    new_boxes[:, [1, 3]] = boxes[:, [1, 3]] + position[1]
+    return new_boxes
+
+def resize(new_shape, img, boxes):
+    new_h, new_w = new_shape
+    h, w = img.shape[:2]
+    scale_x, scale_y = new_w / h, new_h / h
+    new_img = cv2.resize(img, (new_w, new_h))
+    if isinstance(boxes, list):
+        new_boxes = [[x1*scale_x, y1*scale_y, x2*scale_x, y2*scale_y] for (x1, y1, x2, y2) in boxes]
+    else: #numpy array
+        new_boxes = np.copy(boxes)
+        new_boxes[:, 0] = boxes[:, 0] * scale_x
+        new_boxes[:, 1] = boxes[:, 1] * scale_y
+        new_boxes = new_boxes.tolist()
+    
+    return new_img, new_boxes
