@@ -29,10 +29,11 @@ class BankName(SubModule):
             'beneficiary banker\'s name',
             'beneficiary\'s bank',
             'at the bank',
-            'bank'
+            'bank',
+            'at'
         ]
 
-        self.content = all_content['en_bank_name']
+        self.content = all_content['en_bank_name'] if self.marker_prob > 0 or np.random.rand() < 0.5 else ['at' + el for el in all_content['en_bank_name']]
         self.marker_font = normal
         self.content_font = normal
 

@@ -177,18 +177,6 @@ class SubModule:
         return font.getsize(text)
 
     def get_field_coord(self, text, fields, fields_list=[], font=None, poi=False, cursor=None, cut=True):
-        """
-            text = "Ba Le thi mai linh"
-            fields = ["ba", "le thi mai linh"]
-            fields_list = ["gender", "transfer_name"]
-
-            text = 'ngày 19 tháng 12 năm 2020'
-            fields = ['19', '12', '2020']
-            field_list = ['field1', 'field2', 'field3']
-        """
-
-        "only for 1 line text"
-
         if cursor == None:
             cursor = self.cursor
         if font == None:

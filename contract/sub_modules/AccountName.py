@@ -7,7 +7,6 @@ from common import *
 from contract.sub_modules.content import content as all_content
 from contract.sub_modules.font import *
 
-print(all_content.keys())
 
 class AccountName(SubModule):
     def __init__(self, shape=..., canvas=None, 
