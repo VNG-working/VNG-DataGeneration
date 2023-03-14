@@ -11,6 +11,7 @@ from PIL import ImageEnhance
 import string
 import json
 from random import randint
+import xml.etree.ElementTree as ET
 
 font_scale = 32
 
@@ -238,9 +239,6 @@ def randink_blue(bold=False):
                             (0, 92, 230), (51, 102, 255)]
                     
     return ls[randint(0, len(ls))]
-
-def rand_choice(ls):
-    return np.random.choice(ls)
 
 def random_number(num_digit):
     number = ''
@@ -546,6 +544,28 @@ def to_json(fp, fields, shape):
     # print(json_path)
     with open(fp, 'w', encoding='utf-8') as f:
         json.dump(json_dicts, f)
+
+def to_xml(xml_path, imgname, boxes, labels, shape):
+    h, w = shape
+    root = ET.Element('annotations')
+    filename = ET.SubElement(root, 'filename')
+    filename.text = imgname
+    size = ET.SubElement(root, 'size')
+    width = ET.SubElement(size, 'width')
+    height = ET.SubElement(size, 'height')
+    width.text, height.text = str(w), str(h)
+    depth = ET.SubElement(size, 'depth')
+    depth.text = '3'
+    for box, label in zip(boxes, labels):
+        obj = ET.SubElement(root, 'object')
+        name = ET.SubElement(obj, 'name')
+        name.text = label
+        bndbox = ET.SubElement(obj, 'bndbox')
+        xmin, ymin = ET.SubElement(bndbox, 'xmin'), ET.SubElement(bndbox, 'ymin')
+        xmax, ymax = ET.SubElement(bndbox, 'xmax'), ET.SubElement(bndbox, 'ymax')
+        xmin.text, ymin.text, xmax.text, ymax.text = [str(b) for b in box]
+    ET.ElementTree(root).write(xml_path)
+
 
 def mapping(boxes, position):
     '''

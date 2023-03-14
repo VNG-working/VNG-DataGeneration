@@ -165,6 +165,8 @@ if __name__ == '__main__':
     from time import time
     gener = ImageGen('/Users/LAP60311/work/Contract/block_to_image/backgrounds')
     save_path = '/Users/LAP60311/work/Contract/VNG-DataGeneration/contract/result'
+    view = False
+    save = True
     
     for i in range(10):
         # try:
@@ -187,22 +189,29 @@ if __name__ == '__main__':
             blocks.append(module['box'])
             fields += module['module'].get_fields()
         
-        # for block in blocks:
-        #     x1, y1, x2, y2 = block
-        #     img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), thickness = 1)
-        
-        # for field in fields:
-        #     x1, y1, x2, y2 = field['box']
-        #     img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), thickness = 1)
-        # cv2.imshow('img', img)
-        # key = cv2.waitKey(0)
-        # if key == ord('q'):
-        #     exit(-1)
-        # print('Lỗi ở đây là lỗi ở đây')
-        sp = os.path.join(save_path, '_'.join([str(randint(0, 100)), str(randint(0, 100)), str(randint(0, 100))]) + '.jpg')
-        # print(sp)
-        cv2.imwrite(sp, img)
-        print(time() - s)
+        if view:
+            for block in blocks:
+                x1, y1, x2, y2 = block
+                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), thickness = 1)
+            
+            for field in fields:
+                x1, y1, x2, y2 = field['box']
+                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), thickness = 1)
+            cv2.imshow('img', img)
+            key = cv2.waitKey(0)
+            if key == ord('q'):
+                exit(-1)
+        if save:
+            prefix = '_'.join([str(randint(0, 100)), str(randint(0, 100)), str(randint(0, 100))]) 
+            ## Convert to int type for dump json
+            for field in fields:
+                field['box'] = [int(p) for p in field['box']]
+
+            to_json(os.path.join(save_path, prefix + '.json'), fields, img.shape[:2])
+            to_xml(os.path.join(save_path, prefix + '.xml'), prefix+'.jpg', blocks, ['partyA', 'partyB', 'bank'], img.shape[:2])
+            # print(sp)
+            cv2.imwrite(os.path.join(save_path, prefix + '.jpg'), img)
+            print(time() - s)
 
         # except: 
         #     print("lỗi oy T.T")
