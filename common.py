@@ -980,3 +980,47 @@ def resize(new_shape, img, boxes):
         new_boxes = new_boxes.tolist()
     
     return new_img, new_boxes
+
+
+def PIL_augment(image: Image):
+    # Add noise
+    if np.random.rand() < 0.3:
+        noise = np.random.randint(50, 100)
+        image = ImageEnhance.Brightness(image).enhance(noise / 100)
+    # blur the image
+    if np.random.rand() < 0.3:
+        image = image.filter(ImageFilter.GaussianBlur(radius=np.random.uniform(0.5, 1)))
+    # random brightness
+    if np.random.rand() < 0.3:
+        image = ImageEnhance.Brightness(image).enhance(np.random.uniform(0.8, 1.2))
+    # random contrast
+    if np.random.rand() < 0.3:
+        image = ImageEnhance.Contrast(image).enhance(np.random.uniform(0.8, 1.2))
+    
+    return image
+
+def erode_dilate(image: Image):
+    # Create a structuring element
+    gray_img = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
+    kernel_size = np.random.choice([2, 3])
+    # Erode the image
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
+    img = cv2.erode(gray_img, kernel, iterations=1)
+    # Dilate the image
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size-1, kernel_size-1))
+    img = cv2.dilate(img, kernel, iterations=1)
+
+    return Image.fromarray(img).convert('RGB')
+
+def random_drop_black_pixel(image: Image, thresold=50):
+    img = np.array(image)
+    # create a mask of pixel value < 100
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # mask all positions that has pixel value < something < threshold
+    mask = gray_img < np.random.rand(*gray_img.shape) * thresold
+    # randomly set True to False in mask to lessen the effect
+    mask = np.where(np.random.rand(*mask.shape) < 0.5, False, mask)
+    # set the pixel value to white
+    img[mask] = np.random.randint(100, 255)
+    
+    return Image.fromarray(img).convert('RGB')

@@ -83,8 +83,18 @@ class SubModule:
             self.get_field_coord(part2, [part2], [self.label], self.content_font)
         
         self.cut_canvas_to_roi()
+        if np.random.rand() < 0.5:
+            self.augment()
         self.canvas = np.asarray(self.canvas)
         return self
+    
+    def augment(self):
+        ls_augment = np.random.choice([PIL_augment, erode_dilate, random_drop_black_pixel], size=np.random.randint(1, 4))
+        np.random.shuffle(ls_augment)
+        for augment in ls_augment:
+            self.canvas = augment(self.canvas)
+        
+
     
     def resize(self, new_shape):
         boxes = [text['box'] for text in self.fields]
