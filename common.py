@@ -1001,11 +1001,11 @@ def PIL_augment(image: Image):
 
 def erode_dilate(image: Image):
     # Create a structuring element
-    gray_img = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
+    img = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
     kernel_size = np.random.choice([2, 3])
     # Erode the image
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
-    img = cv2.erode(gray_img, kernel, iterations=1)
+    img = cv2.erode(img, kernel, iterations=1)
     # Dilate the image
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size-1, kernel_size-1))
     img = cv2.dilate(img, kernel, iterations=1)

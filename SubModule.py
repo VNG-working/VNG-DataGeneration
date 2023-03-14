@@ -94,7 +94,6 @@ class SubModule:
         for augment in ls_augment:
             self.canvas = augment(self.canvas)
         
-
     
     def resize(self, new_shape):
         boxes = [text['box'] for text in self.fields]
