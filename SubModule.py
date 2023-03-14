@@ -11,11 +11,10 @@ import PIL.ImageFilter as ImageFilter
 from PIL import ImageEnhance
 
 
-
 class SubModule:
-    def __init__(self, shape = [1000, 1000], marker_prob = 0.5, down_prob=0.2, augment_prob = 0.5,
+    def __init__(self, shape = [1000, 1000], marker_prob = 0.5, down_prob=0.2,
                  marker_font:ImageFont.truetype = None, content_font:ImageFont.truetype = None,
-                 markers = [], content = None, label = None, ink = None):
+                 markers = [], content = None, label = None, ink = None, augment_prob = 0.5):
         self.canvas =  np.full(shape + (3,), 255, dtype=np.uint8)
         self.canvas = Image.fromarray(self.canvas)
         self.fields = []
@@ -31,6 +30,7 @@ class SubModule:
         self.draw = ImageDraw.Draw(self.canvas)
         self.ink = ink
         self.default_font_size = 20
+        self.augment_prob = augment_prob
 
     def get_shape(self):
         return self.canvas.shape[:2]
@@ -89,12 +89,13 @@ class SubModule:
         return self
     
     def augment(self):
-        ls_augment = np.random.choice([PIL_augment, erode_dilate, random_drop_black_pixel], size=np.random.randint(1, 4))
-        np.random.shuffle(ls_augment)
-        for augment in ls_augment:
-            self.canvas = augment(self.canvas)
+        if np.random.random() < 0:
+            self.canvas = PIL_augment(self.canvas)
+        if np.random.random() < 0.5:
+            self.canvas = erode_dilate(self.canvas)
+        if np.random.random() < 0.5:
+            self.canvas = random_drop_black_pixel(self.canvas)    
         
-    
     def resize(self, new_shape):
         boxes = [text['box'] for text in self.fields]
         self.canvas, boxes = resize(new_shape, self.canvas, boxes)

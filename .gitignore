@@ -134,3 +134,5 @@ data\
 test.py
 test.jpg
 test.json
+.DS_Store
+*/.DS_Store

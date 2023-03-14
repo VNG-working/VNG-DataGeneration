@@ -36,29 +36,29 @@ comname_markers = [
 comname_content = all_content['vn_com_name'] + all_content["en_com_name_abrre"]
 
 class CompanyName(SubModule):
-    def __init__(self,  marker_prob=0.7, down_prob=0.2, markers=comname_markers, content=comname_content, label='company_name', ink=None):
-        marker_font = normal
-        content_font = normal
-        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, label, ink)
+    def __init__(self, marker_font, content_font, marker_prob=0.7, down_prob=0.2, ink=None):
+        markers=comname_markers
+        content=comname_content
+        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'company_name', ink)
 
 class Company_Address(SubModule):
-    def __init__(self,  marker_prob=0.7, down_prob=0.2, markers=address_markers, content=address_content, label='company_address', ink=None):
-        marker_font = normal
-        content_font = normal
-        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, label, ink)
+    def __init__(self, marker_font, content_font, marker_prob=0.7, down_prob=0.2,  ink=None):
+        markers=address_markers
+        content=address_content
+        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'company_address', ink)
 
 class Bank_Address(SubModule):
-    def __init__(self, marker_prob=0.7, down_prob=0.2, markers=address_markers, content=address_content, label='bank_address', ink=None):
-        marker_font = normal
-        content_font = normal
-        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, label, ink)
+    def __init__(self, marker_font, content_font, marker_prob=0.7, down_prob=0.2,  ink=None):
+        markers=address_markers
+        content=address_content
+        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'bank_address', ink)
 
 ######################
 ### Phần của Khôi
 ######################
 
 class Phone(SubModule):
-    def __init__(self, marker_prob=0.5, down_prob = 0):
+    def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob = 0, ink=None):
         content = '' if np.random.random() < 0.5 else '+'
         for i in range(14):
             prob = np.random.random()
@@ -71,13 +71,11 @@ class Phone(SubModule):
 
         content = ["".join(content)]
         markers = ['Tel', 'Tel No', 'Tel Number', 'Telephone', 'Phone/ Điện thoại', 'Phone', 'City Tel', 'Mobile']
-        marker_font = normal
-        content_font = normal
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font,
-         markers, content, label='phone', ink=None)
+         markers, content, 'phone', ink)
 
 class Fax(SubModule):
-    def __init__(self, marker_prob=0.5, down_prob = 0):
+    def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob = 0, ink=None):
         content = '' if np.random.random() < 0.5 else '+'
         for i in range(14):
             prob = np.random.random()
@@ -90,38 +88,29 @@ class Fax(SubModule):
 
         content = ["".join(content)]
         markers = ['Fax', 'Fax No']
-        marker_font: ImageFont.truetype = normal
-        content_font: ImageFont.truetype = normal
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font,
-         markers, content, label='fax', ink=None)
+         markers, content, 'fax', ink)
 
 class Tax(SubModule):
-    def __init__(self, marker_prob=0.5, down_prob = 0):    
-        content = ["".join(str(randint(0, 10)) for i in range(10))]
+    def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob = 0, ink=None):    
+        content = [random_number(10)]
         markers = ['Tax', 'Tax code']
         
-        marker_font: ImageFont.truetype = normal
-        content_font: ImageFont.truetype = normal
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font,
-         markers, content, label='tax', ink=None)
+         markers, content, 'tax', ink)
 
 class AccountNumber(SubModule):
-    def __init__(self, marker_prob=0.5, down_prob = 0):
+    def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob = 0, ink=None):
         
-        ink=None
-        marker_font: ImageFont.truetype = normal
-        content_font: ImageFont.truetype = normal
         markers=["Account", "A/C No"]
        
-        content = ["".join(str(randint(0, 10)) for i in range(10))]
+        content = [random_number(10)]
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'account_number', ink)
 
 class RepresentedBy(SubModule):
 
-    def __init__(self, marker_prob=0.5, down_prob=0.0, ink=None):
+    def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob=0.0, ink=None):
         
-        marker_font: ImageFont.truetype = bold
-        content_font: ImageFont.truetype = bold
         markers=["Represented by", 'Represented', 'Presented', 'Presented By']
 
         _call = np.random.choice(["Mr.", "Mrs.", "Miss"])
@@ -141,23 +130,19 @@ faker = Faker()
 faker.add_provider(bank)
 
 class SwiftCode(SubModule):
-    def __init__(self, marker_prob=1, down_prob=0.2, ink=None):
+    def __init__(self, marker_font, content_font, marker_prob=1, down_prob=0.2, ink=None):
         markers = [
-            'bank swift code',
             'swift code',
             'swift',
-            'bank\'s swift code',
         ]
 
         random_code = faker.swift() if np.random.rand() < 0.9 else faker.swift(length=11, primary=True)
         content = [random_code]
-        marker_font = normal
-        content_font = normal
         
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'swift_code', ink)
    
 class AccountName(SubModule):
-    def __init__(self, marker_prob=0.5, down_prob=0.2, ink=None):
+    def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob=0.2, ink=None):
 
         
         markers = [
@@ -167,13 +152,11 @@ class AccountName(SubModule):
             'beneficiary\'s account name',
         ]
         content = all_content["en_com_name_abrre"] + all_content['vn_com_name']
-        marker_font = normal
-        content_font = normal
 
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'account_name', ink)
 
 class BankName(SubModule):
-    def __init__(self, marker_prob=1, down_prob=0.2, ink=None):
+    def __init__(self, marker_font, content_font, marker_prob=1, down_prob=0.2, ink=None):
 
         markers = [
             'bank name',
@@ -186,14 +169,12 @@ class BankName(SubModule):
             'bank'
         ]
 
-        content = all_content['en_bank_name']
-        marker_font = normal
-        content_font = normal
+        content = all_content['en_bank_name'] if marker_prob > 0 or np.random.rand() < 0.5 else ['at' + el for el in all_content['en_bank_name']]
 
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'bank_name', ink)
 
 class RepresentedPosition(SubModule):
-    def __init__(self, marker_prob=0.5, down_prob=0, ink=None):
+    def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob=0, ink=None):
 
         markers = [
             "Position",
@@ -205,8 +186,6 @@ class RepresentedPosition(SubModule):
             "Representator"
         ]
         content = all_content['pos']
-        marker_font = normal
-        content_font = normal
 
-        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'represented_position')
+        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'represented_position', ink)
 

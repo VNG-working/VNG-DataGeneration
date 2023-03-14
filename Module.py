@@ -6,6 +6,7 @@ class Module:
     def __init__(self):
         self.submodules = []
         self.canvas = None
+        self.fields = []
 
     def get_shape(self):
         if self.canvas is None:
@@ -16,6 +17,7 @@ class Module:
         fields = []
         for submodule in self.submodules:
             fields += list(submodule['submodule'].fields)
+        self.fields = fields
         return fields
 
     def __paste__(self, submodule, position):
@@ -41,6 +43,7 @@ class Module:
         '''
 
     def resize(self, new_shape):
+        self.get_fields()
         boxes = [text['box'] for text in self.fields]
         self.canvas, boxes = resize(new_shape, self.canvas, boxes)
         for i in range(len(boxes)):

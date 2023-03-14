@@ -11,7 +11,7 @@ reprenented_name, represented_position, bank_name, bank_address, account_number,
 account_name, swift_code 
 '''
 
-class Buyer(Module):
+class Party(Module):
     def __init__(self):
         super().__init__()
     
@@ -19,14 +19,14 @@ class Buyer(Module):
     def update_cursor(cursor, submodule, direction='down'):
         h, w = submodule.get_shape()
         if direction == 'down':
-            cursor[0] = max(2, cursor[0] + randint(-5, 5))
-            cursor[1] = cursor[1] + h + randint(5, 10) #x1, y2
+            # cursor[0] = cursor[0] #max(2, cursor[0] + randint(-5, 5))
+            cursor[1] = cursor[1] + h + randint(5, 20) #x1, y2
         elif direction == 'reset_down':
-            cursor[0] = randint(5, 15)
-            cursor[1] = cursor[1] + h + randint(5, 10) #x1, y2
+            cursor[0] = 10 #randint(5, 15)
+            cursor[1] = cursor[1] + h + randint(5, 20) #x1, y2
         else:
-            cursor[0] = cursor[0] + w + randint(5, 10)
-            cursor[1] =  max(cursor[1] + randint(-5, 5), 2) #x2, y1
+            cursor[0] = cursor[0] + w + randint(20, 100)
+            # cursor[1] = cursor[1] #max(cursor[1] + randint(-5, 5), 2) #x2, y1
         return cursor
         
     def __call__(self, company_name, company_address, phone, fax, tax, reprenented_name,
@@ -56,7 +56,7 @@ class Buyer(Module):
                 cursor = self.update_cursor(cursor, submodule, 'reset_down')
                 right_flag = False
             else:
-                if np.random.random() < 0: # Still downline
+                if np.random.random() < 0.7: # Still downline
                     cursor = self.update_cursor(cursor, submodule, 'down')
                     right_flag = False
                 else:
@@ -76,7 +76,7 @@ class Buyer(Module):
             
             list_bank_modules = [account_number, account_name, swift_code]
             for submodule in list_bank_modules:
-                if np.random.random() < 0.5: # skip component
+                if np.random.random() < 0.2: # skip component
                     continue
         
                 self.__paste__(submodule, position=cursor)
@@ -90,27 +90,37 @@ class Buyer(Module):
             x1, y1, x2, y2 = sub['box']
             self.canvas[y1:y2, x1:x2] = sub['submodule'].canvas
             
+def init_party(font_size):
+    font = Font(font_scale=font_size)
+    font_normal, font_bold, font_italic = font.get_font('normal'), font.get_font('bold'), font.get_font('italic')
+    def rand_font():
+        return np.random.choice([font_normal, font_bold, font_italic])
+
+    company_name = CompanyName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
+    company_address = Company_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
+    phone = Phone(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
+    fax = Fax(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
+    tax = Tax(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
+    reprenented_name = RepresentedBy(rand_font(), rand_font(), marker_prob=0.8, down_prob=0.0)()
+    represented_position = RepresentedPosition(rand_font(), rand_font(), marker_prob=0.3, down_prob=0.0)()
+    bank_name = BankName(rand_font(), rand_font(),marker_prob=0.7, down_prob=0)()
+    bank_address = Bank_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
+    account_number = AccountNumber(rand_font(), rand_font(), marker_prob=1)()
+    account_name = AccountName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
+    swift_code = SwiftCode(rand_font(), rand_font(), marker_prob=1, down_prob=0)()
+    
+    party = Party()
+    party(company_name, company_address, phone, fax, tax, reprenented_name,
+            represented_position, bank_name, bank_address, account_number,
+            account_name, swift_code)
+    
+    return party
 
 if __name__ == '__main__':
     import cv2
     for i in range(10):
-        buyer = Buyer()
-        company_name = CompanyName(marker_prob=0.7, down_prob=0.2)()
-        company_address = Company_Address(marker_prob=0.7, down_prob=0.2)()
-        phone = Phone(marker_prob=1, down_prob = 0)()
-        fax = Fax(marker_prob=1, down_prob = 0)()
-        tax = Tax(marker_prob=1, down_prob = 0)()
-        reprenented_name = RepresentedBy(marker_prob=0.8, down_prob=0.0)()
-        represented_position = RepresentedPosition(marker_prob=0.3, down_prob=0.0)()
-        bank_name = BankName(marker_prob=0.7, down_prob=0)()
-        bank_address = Bank_Address(marker_prob=0.7, down_prob=0.2)()
-        account_number = AccountNumber()()
-        account_name = AccountName(marker_prob=0.7, down_prob=0.2)()
-        swift_code = SwiftCode(marker_prob=1, down_prob=0)()
-        buyer(company_name, company_address, phone, fax, tax, reprenented_name,
-                represented_position, bank_name, bank_address, account_number,
-                account_name, swift_code)
-        
+        buyer = init_party(20)
+    
         fields = buyer.get_fields()
         for field in fields:
             x1, y1, x2, y2 = field['box']
