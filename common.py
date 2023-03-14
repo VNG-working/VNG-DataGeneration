@@ -12,6 +12,14 @@ import string
 import json
 from random import randint
 import xml.etree.ElementTree as ET
+import numpy as np
+import cv2
+import albumentations as A
+import math
+import random
+from typing import Dict, Any
+import pdb
+
 
 font_scale = 32
 
@@ -501,7 +509,7 @@ def get_text_height(text, font=None):
     
     return max
 
-def widen_box(xmin, ymin, xmax, ymax, factor=1.1, cut=True, size = None):     
+def widen_box(xmin, ymin, xmax, ymax, factor=1.15, cut=True, size = None):     
     center = [(xmax + xmin) / 2, (ymax + ymin) / 2]
     # print("original" , xmin , ymin , xmax , ymax)
     # print(center)
@@ -527,11 +535,11 @@ def to_json(fp, fields, shape):
 
     for field in fields:
         box = field['box']
-        tl = [box[0], box[1]]
-        tr = [box[2], box[1]]
-        br = [box[2], box[3]]
-        bl = [box[0], box[3]]
-
+        x1, y1, x2, y2, x3, y3, x4, y4 = box
+        tl = [x1, y1]
+        tr = [x2, y2]
+        br = [x3, y3]
+        bl = [x4, y4]
         if tl[0] > w or tl[1] > h:
             continue
 
@@ -607,10 +615,10 @@ def PIL_augment(image: Image):
         image = image.filter(ImageFilter.GaussianBlur(radius=np.random.uniform(0.5, 1)))
     # random brightness
     if np.random.rand() < 0.3:
-        image = ImageEnhance.Brightness(image).enhance(np.random.uniform(0.8, 1.2))
+        image = ImageEnhance.Brightness(image).enhance(np.random.uniform(0.9, 1.1))
     # random contrast
     if np.random.rand() < 0.3:
-        image = ImageEnhance.Contrast(image).enhance(np.random.uniform(0.8, 1.2))
+        image = ImageEnhance.Contrast(image).enhance(np.random.uniform(0.9, 1.1))
     
     return image
 
@@ -638,4 +646,85 @@ def random_drop_black_pixel(image: Image, thresold=50):
     # set the pixel value to white
     img[mask] = np.random.randint(100, 255)
     
+    
     return Image.fromarray(img).convert('RGB')
+
+class BaseAugmenter:
+    def __init__(self, augmenter, size=None):
+        self.size = size
+        self.augmenter = augmenter
+    
+    def __call__(self, image, boxes):
+        # assert len(boxes.shape) == 3
+        keypoints = np.copy(boxes.reshape((-1, 2)))
+        trans = self.augmenter(image=image.copy(), keypoints=keypoints)
+        aug_img = trans['image']
+        aug_boxes = np.reshape(trans['keypoints'], (-1, 4, 2))
+        size = self.size if self.size is not None else image.shape[:2]
+        aug_boxes = self.validate_boxes(aug_boxes, size)
+        return aug_img, aug_boxes
+
+    def validate_boxes(self, boxes, size):
+        size_h, size_w = size
+        new_boxes = []
+        for box in boxes:
+            # pdb.set_trace() 
+            if np.sum(box[:, 0] > size_w) > 0 or np.sum(box[:, 0] < 0) > 0:
+                continue
+            if np.sum(box[:, 1] > size_h) > 0 or np.sum(box[:, 1] < 0) > 0:
+                continue
+            new_boxes.append(box)
+        return np.array(new_boxes, dtype=np.int32)
+    
+
+class MySafeRotate(A.SafeRotate):
+    def __init__(self, limit=3, interpolation=cv2.INTER_LINEAR, border_mode=cv2.BORDER_REFLECT_101, value=None, mask_value=None, always_apply=False, p=0.5):
+        super().__init__(limit, interpolation, border_mode, value, mask_value, always_apply, p)
+        self.limit = limit
+
+    def get_params_dependent_on_targets(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        angle = self.limit
+
+        image = params["image"]
+        h, w = image.shape[:2]
+
+        # https://stackoverflow.com/questions/43892506/opencv-python-rotate-image-without-cropping-sides
+        image_center = (w / 2, h / 2)
+
+        # Rotation Matrix
+        rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+
+        # rotation calculates the cos and sin, taking absolutes of those.
+        abs_cos = abs(rotation_mat[0, 0])
+        abs_sin = abs(rotation_mat[0, 1])
+
+        # find the new width and height bounds
+        new_w = math.ceil(h * abs_sin + w * abs_cos)
+        new_h = math.ceil(h * abs_cos + w * abs_sin)
+
+        scale_x = w / new_w
+        scale_y = h / new_h
+
+        # Shift the image to create padding
+        rotation_mat[0, 2] += new_w / 2 - image_center[0]
+        rotation_mat[1, 2] += new_h / 2 - image_center[1]
+
+        # Rescale to original size
+        scale_mat = np.diag(np.ones(3))
+        scale_mat[0, 0] *= scale_x
+        scale_mat[1, 1] *= scale_y
+        _tmp = np.diag(np.ones(3))
+        _tmp[:2] = rotation_mat
+        _tmp = scale_mat @ _tmp
+        rotation_mat = _tmp[:2]
+
+        return {"matrix": rotation_mat, "angle": angle, "scale_x": scale_x, "scale_y": scale_y}
+
+
+class RandomRotate:
+    def __init__(self, limit=3):
+        augmenter = A.Compose([MySafeRotate(limit, border_mode=cv2.BORDER_CONSTANT, value=[255, 255, 255], p=1.0)],
+                              keypoint_params=A.KeypointParams(format='xy', remove_invisible=False))
+        self.base_augmenter = BaseAugmenter(augmenter, None)
+    def __call__(self, image, boxes):
+        return self.base_augmenter(image, boxes)

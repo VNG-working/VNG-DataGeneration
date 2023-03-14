@@ -86,6 +86,7 @@ class SubModule:
         if np.random.rand() < self.augment_prob:
             self.augment()
         self.canvas = np.asarray(self.canvas)
+
         return self
     
     def augment(self):
@@ -247,7 +248,7 @@ class SubModule:
                 flag_loi_ra_le_phai = False
                 while word_bb[2] - get_last_length(word, font) // 4 > self.canvas.size[0]:
                     flag_loi_ra_le_phai = True
-                    print('word hit deleted: ', word)
+                    # print('word hit deleted: ', word)
                     word = word[:-1]
 
                     word_bb = self.draw.textbbox(
@@ -269,7 +270,7 @@ class SubModule:
                 idx += len(word) + 1
 
                 if flag_loi_ra_le_phai:
-                    print('final word: ', word)
+                    # print('final word: ', word)
                     break
 
         # print('outlier: ', outlier)

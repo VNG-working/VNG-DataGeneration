@@ -6,6 +6,7 @@ import numpy as np
 from party import Party
 from bank import Bank
 from common import *
+import pdb
 
 def blend(module, background, position):
     '''
@@ -163,56 +164,80 @@ def init_bank(font_size):
 
 if __name__ == '__main__':
     from time import time
-    gener = ImageGen('/Users/LAP60311/work/Contract/block_to_image/backgrounds')
-    save_path = '/Users/LAP60311/work/Contract/VNG-DataGeneration/contract/result'
+    gener = ImageGen('/home/fiores/Downloads/backgrounds')
+    save_path = '/home/fiores/Downloads/results-2'
+    os.makedirs(save_path, exist_ok=True)
     view = False
     save = True
     
-    for i in range(10):
-        # try:
-        s = time()
-        gener.reset()
-        background = gener.get_random_background()
-        font_size = background['font_size']
+    # field['box'] = [x1, y1, x2, y2, x3, y3, x4, y4]
+    # block = [xmin, ymin, xmax, ymax]
+    for i in range(100):
+        try:
+            s = time()
+            gener.reset()
+            background = gener.get_random_background()
+            font_size = background['font_size']
 
-        partyA = init_party(font_size)
-        partyB = init_party(font_size)
-        modules = [partyA, partyB]
-        if np.random.random() < 0.7: #Bank info or not
-            bank = init_bank(font_size)
-            modules.append(bank)
+            partyA = init_party(font_size)
+            partyB = init_party(font_size)
+            modules = [partyA, partyB]
+            if np.random.random() < 0.7: #Bank info or not
+                bank = init_bank(font_size)
+                modules.append(bank)
 
-        img = gener.gen_image(modules)
-        fields = []
-        blocks = []
-        for module in gener.modules:
-            blocks.append(module['box'])
-            fields += module['module'].get_fields()
-        
-        if view:
-            for block in blocks:
-                x1, y1, x2, y2 = block
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), thickness = 1)
-            
-            for field in fields:
-                x1, y1, x2, y2 = field['box']
-                img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), thickness = 1)
-            cv2.imshow('img', img)
-            key = cv2.waitKey(0)
-            if key == ord('q'):
-                exit(-1)
-        if save:
-            prefix = '_'.join([str(randint(0, 100)), str(randint(0, 100)), str(randint(0, 100))]) 
-            ## Convert to int type for dump json
-            for field in fields:
-                field['box'] = [int(p) for p in field['box']]
+            img = gener.gen_image(modules)
+            fields = []
+            blocks = []
+            for module in gener.modules:
+                blocks.append(module['box'])
+                fields += module['module'].get_fields()
+            # convert field from [x1, y1, x2, y2] to [x1, y1, x2, y2, x3, y3, x4, y4]
+            for i, field in enumerate(fields):
+                xmin, ymin, xmax, ymax = field['box']
+                fields[i]['box'] = [xmin, ymin, xmax, ymin, xmax, ymax, xmin, ymax]
 
-            to_json(os.path.join(save_path, prefix + '.json'), fields, img.shape[:2])
-            to_xml(os.path.join(save_path, prefix + '.xml'), prefix+'.jpg', blocks, ['partyA', 'partyB', 'bank'], img.shape[:2])
-            # print(sp)
-            cv2.imwrite(os.path.join(save_path, prefix + '.jpg'), img)
-            print(time() - s)
+            # random rotate
+            is_rotate = np.random.random() < 0.5
+            if is_rotate:
+                boxes = []
+                for field in fields:
+                    x1, y1, x2, y2, x3, y3, x4, y4 = field['box']
+                    boxes.extend([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
+                rotate_angle = np.random.randint(-3, 4)
+                rotater = RandomRotate(limit=rotate_angle)
+                rotated_img, rotated_boxes = rotater(img, np.array(boxes))
+                img = rotated_img
+                for i, field in enumerate(fields):
+                    fields[i]['box'] = [coord for pt in rotated_boxes[i] for coord in pt]
 
-        # except: 
-        #     print("lỗi oy T.T")
-        #     pass
+            if view:
+                for block in blocks:
+                    x1, y1, x2, y2 = block
+                    img = cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), thickness = 1)
+                
+                for field in fields:
+                    x1, y1, x2, y2, x3, y3, x4, y4 = field['box']
+                    img = cv2.rectangle(img, (x1, y1), (x3, y3), (0, 255, 0), thickness = 1)
+                cv2.imshow('img', img)
+                key = cv2.waitKey(0)
+                if key == ord('q'):
+                    exit(-1)
+
+            if save:
+                prefix = '_'.join([str(randint(0, 100)), str(randint(0, 100)), str(randint(0, 100))])
+                if is_rotate:
+                    prefix += f'_rotate_{rotate_angle}'
+                ## Convert to int type for dump json
+                for field in fields:
+                    field['box'] = [int(p) for p in field['box']]
+
+                to_json(os.path.join(save_path, prefix + '.json'), fields, img.shape[:2])
+                to_xml(os.path.join(save_path, prefix + '.xml'), prefix+'.jpg', blocks, ['partyA', 'partyB', 'bank'], img.shape[:2])
+                cv2.imwrite(os.path.join(save_path, prefix + '.jpg'), img)
+                print(time() - s)
+
+        except Exception as e:
+            # raise e 
+            print(e)
+            pass
