@@ -13,7 +13,7 @@ from PIL import ImageEnhance
 
 
 class SubModule:
-    def __init__(self, shape = [1000, 1000], marker_prob = 0.5, down_prob=0.2,
+    def __init__(self, shape = [1000, 1000], marker_prob = 0.5, down_prob=0.2, augment_prob = 0.5,
                  marker_font:ImageFont.truetype = None, content_font:ImageFont.truetype = None,
                  markers = [], content = None, label = None, ink = None):
         self.canvas =  np.full(shape + (3,), 255, dtype=np.uint8)
@@ -83,7 +83,7 @@ class SubModule:
             self.get_field_coord(part2, [part2], [self.label], self.content_font)
         
         self.cut_canvas_to_roi()
-        if np.random.rand() < 0.5:
+        if np.random.rand() < self.augment_prob:
             self.augment()
         self.canvas = np.asarray(self.canvas)
         return self
