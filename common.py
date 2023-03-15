@@ -741,3 +741,21 @@ def rotate_img_after_gen(img, fields):
         fields[i]['box'] = [coord for pt in rotated_boxes[i] for coord in pt]
     
     return rotated_img, fields, rotate_angle
+
+def augment_scan(dir):
+    """
+        make all img in dir look scanned
+        need Image Magick to be installed
+    """
+    import subprocess
+    import os
+
+    for fn in os.listdir(dir):
+        if not fn.endswith('.jpg'):
+            continue
+        fp = os.path.join(dir, fn)
+        command = f'convert -density 150 {fp} -colorspace gray -linear-stretch 3.5%x10% -blur 0x0.5 -attenuate 0.25 +noise Gaussian {fp}'
+        num_repeat = np.random.choice([1, 2])
+        for _ in range(num_repeat):
+            res = subprocess.run(command, shell=True)
+        print(f'done {fp}')
