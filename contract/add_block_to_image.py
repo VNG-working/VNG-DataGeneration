@@ -165,7 +165,7 @@ def init_bank(font_size):
 if __name__ == '__main__':
     from time import time
     gener = ImageGen('/home/fiores/Downloads/backgrounds')
-    save_path = '/home/fiores/Downloads/results-2'
+    save_path = '/home/fiores/Desktop/VNG/VNG-DataGeneration/contract/result/'
     os.makedirs(save_path, exist_ok=True)
     view = False
     save = True
@@ -200,16 +200,7 @@ if __name__ == '__main__':
             # random rotate
             is_rotate = np.random.random() < 0.5
             if is_rotate:
-                boxes = []
-                for field in fields:
-                    x1, y1, x2, y2, x3, y3, x4, y4 = field['box']
-                    boxes.extend([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
-                rotate_angle = np.random.randint(-3, 4)
-                rotater = RandomRotate(limit=rotate_angle)
-                rotated_img, rotated_boxes = rotater(img, np.array(boxes))
-                img = rotated_img
-                for i, field in enumerate(fields):
-                    fields[i]['box'] = [coord for pt in rotated_boxes[i] for coord in pt]
+                img, fields, rotate_angle = rotate_img_after_gen(img, fields)
 
             if view:
                 for block in blocks:

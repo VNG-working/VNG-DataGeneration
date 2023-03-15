@@ -728,3 +728,16 @@ class RandomRotate:
         self.base_augmenter = BaseAugmenter(augmenter, None)
     def __call__(self, image, boxes):
         return self.base_augmenter(image, boxes)
+    
+def rotate_img_after_gen(img, fields):
+    boxes = []
+    for field in fields:
+        x1, y1, x2, y2, x3, y3, x4, y4 = field['box']
+        boxes.extend([[x1, y1], [x2, y2], [x3, y3], [x4, y4]])
+    rotate_angle = np.random.randint(-3, 4)
+    rotater = RandomRotate(limit=rotate_angle)
+    rotated_img, rotated_boxes = rotater(img, np.array(boxes))
+    for i, field in enumerate(fields):
+        fields[i]['box'] = [coord for pt in rotated_boxes[i] for coord in pt]
+    
+    return rotated_img, fields, rotate_angle
