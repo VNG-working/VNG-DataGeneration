@@ -39,7 +39,16 @@ def blend_white(img, position, blank_shape):
     h, w = blank_shape
     blank = np.full(blank_shape + (3,), 255, dtype='uint8')
     cx, cy = x + w//2, y + h//2
-    img = cv2.seamlessClone(blank, img, mask=None, p=(cx, cy), flags=cv2.MONOCHROME_TRANSFER)
+    # img = cv2.seamlessClone(blank, img, mask=None, p=(cx, cy), flags=cv2.MONOCHROME_TRANSFER)
+
+    # pil blend
+    img = Image.fromarray(img).convert('RGBA')
+    blank_img = Image.fromarray(blank).convert('RGBA')
+    background_part = img.crop((x, y, x+w, y+h))
+    blended_part = Image.blend(background_part, blank_img, alpha=0.98)
+    img.paste(blended_part, (x, y, x+w, y+h))
+    img = np.array(img.convert('RGB'))
+
     return img
 
 class ImageGen:
