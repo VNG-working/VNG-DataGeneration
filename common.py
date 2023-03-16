@@ -759,3 +759,9 @@ def augment_scan(dir):
         for _ in range(num_repeat):
             res = subprocess.run(command, shell=True)
         print(f'done {fp}')
+
+def double_case_prob(prob = 0.2):
+    if np.random.random() < 0.2:
+        return 1
+    else:
+        return 0

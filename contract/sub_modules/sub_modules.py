@@ -111,12 +111,27 @@ class RepresentedBy(SubModule):
 
     def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob=0.0, ink=None):
         
-        markers=["Represented by", 'Represented', 'Presented', 'Presented By']
+        markers=["Represented by", 
+                 'Represented', 
+                 'Presented', 
+                 'Presented By',
+                 "Represented Position",
+                 "Representative",
+                 "Representator"]
 
         _call = np.random.choice(["Mr.", "Mrs.", "Miss"])
         name = np.random.choice(all_content["en_per_name"])
         pos = np.random.choice(all_content["pos"])
-        content = [f"{_call} {name.upper()} - {pos}"]
+        dash = double_case_prob(0.2) * "-"
+        _pos = double_case_prob(0.2) * "Position"
+        __pos = double_case_prob(0.2) * ":"
+
+        if np.random.random() < 0.8:
+            name = name.capitalize()
+        else:
+            name = random.choice([name.lower(), name.upper()])
+
+        content = [f"{_call} {name.upper()} {dash} {_pos} {__pos} {pos}"]
 
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'reprented_name', ink)
 

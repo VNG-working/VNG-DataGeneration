@@ -32,9 +32,8 @@ class Party(Module):
             # cursor[1] = cursor[1] #max(cursor[1] + randint(-5, 5), 2) #x2, y1
         return cursor
         
-    def __call__(self, company_name, company_address, phone, fax, tax, reprenented_name,
-                represented_position, bank_name, bank_address, account_number,
-                account_name, swift_code):
+    def __call__(self, company_name, company_address, phone, fax, tax, reprenented_name, 
+                bank_name, bank_address, account_number, account_name, swift_code):
             
         right_flag = False
         #Paste company name and company_address_first
@@ -45,7 +44,7 @@ class Party(Module):
         self.__paste__(company_address, position=cursor)
         cursor = self.update_cursor(cursor, company_address, 'down')
 
-        list_submodules = [phone, fax, tax, reprenented_name, represented_position]
+        list_submodules = [phone, fax, tax, reprenented_name]
         np.random.shuffle(list_submodules)
         
         #other info of company
