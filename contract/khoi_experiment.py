@@ -127,11 +127,18 @@ class ImageGen:
             fields += list(module.get_fields())
         return fields
 
-def init_party(font_size):
+def init_party(font_size, fbold_prob = 0.15, fitalic_prob = 0.05):
     font = Font(font_scale=font_size)
     font_normal, font_bold, font_italic = font.get_font('normal'), font.get_font('bold'), font.get_font('italic')
     def rand_font():
-        return np.random.choice([font_normal, font_bold, font_italic])
+        # return np.random.choice([font_normal, font_bold, font_italic])
+
+        if np.random.random() < fitalic_prob:
+            return font_italic
+        elif fitalic_prob <= np.random.random() < fbold_prob:
+            return font_bold
+        else:
+            return font_normal
 
     company_name = CompanyName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
     company_address = Company_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
