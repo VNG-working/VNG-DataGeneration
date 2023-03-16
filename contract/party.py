@@ -12,7 +12,10 @@ account_name, swift_code
 '''
 
 class Party(Module):
-    def __init__(self):
+    def __init__(self, skip_prob:float = 0.2, down_prob:float = 0.7, bank_prob = 0.8):
+        self.skip_prob = skip_prob
+        self.down_prob = down_prob
+        self.bank_prob = bank_prob
         super().__init__()
     
     @staticmethod
@@ -47,7 +50,7 @@ class Party(Module):
         
         #other info of company
         for i, submodule in enumerate(list_submodules):
-            if np.random.random() < 0.2: # skip component
+            if np.random.random() < self.skip_prob: # skip component
                 continue
     
             self.__paste__(submodule, position=cursor)
@@ -56,7 +59,7 @@ class Party(Module):
                 cursor = self.update_cursor(cursor, submodule, 'reset_down')
                 right_flag = False
             else:
-                if np.random.random() < 0.7: # Still downline
+                if np.random.random() < self.down_prob: # Still downline
                     cursor = self.update_cursor(cursor, submodule, 'down')
                     right_flag = False
                 else:
@@ -66,7 +69,7 @@ class Party(Module):
         
         # Bank info
         # Random prob appear bank info
-        if np.random.random() < 0.8:
+        if np.random.random() < self.bank_prob:
             right_flag = False
             self.__paste__(bank_name, position=cursor)
             cursor = self.update_cursor(cursor, bank_name, 'down')
@@ -76,7 +79,7 @@ class Party(Module):
             
             list_bank_modules = [account_number, account_name, swift_code]
             for submodule in list_bank_modules:
-                if np.random.random() < 0.2: # skip component
+                if np.random.random() < self.skip_prob: # skip component
                     continue
         
                 self.__paste__(submodule, position=cursor)
