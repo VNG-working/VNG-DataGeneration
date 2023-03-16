@@ -54,7 +54,6 @@ class Party(Module):
                 continue
     
             self.__paste__(submodule, position=cursor)
-            # print('Cursor before: ', cursor)
             if right_flag: #next component must be down line
                 cursor = self.update_cursor(cursor, submodule, 'reset_down')
                 right_flag = False
@@ -68,7 +67,7 @@ class Party(Module):
         
         # Bank info
         if np.random.random() < self.bank_prob:
-            type = np.random.choice([1, 2]) if bank_name.has_marker else 2
+            type = np.random.choice([1, 2]) if bank_name.has_marker else 2  # neu bank_name ko co marker, no phai nam cung dong voi account_name hoac nam ngay duoi
             skip_prob_dict = {
                 'BankName': 0,
                 'Bank_Address': 0.3,
@@ -87,9 +86,10 @@ class Party(Module):
                     cursor = self.update_cursor(cursor, submodule, 'down')
 
             elif type == 2: # co the co 2 field 1 dong
+                # dinh nghia cac submodule co the o cung 1 dong
                 submodule_name_pair = [('AccountNumber', 'BankName'), ('AccountName', 'AccountNumber'), ('AccountNumber', 'SwiftCode')][np.random.choice([0, 1, 2], p=[0.6, 0.2, 0.2])]
                 submodule_pair = [submodule for submodule in ls_submodules if submodule.__class__.__name__ in submodule_name_pair]
-                if not bank_name.has_marker and bank_name != submodule_pair[1]:
+                if not bank_name.has_marker and bank_name != submodule_pair[1]: # neu bank_name ko co marker => no phai o sau account_number
                     submodule_pair = submodule_pair[::-1]
                 else:
                     np.random.shuffle(submodule_pair)

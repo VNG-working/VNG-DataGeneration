@@ -480,15 +480,11 @@ def random_space(text):
     """
         randomly replace a space in text with 0-5 space
     """
-    # new_text = ''
-    # for word in text.split():
-    #     if np.random.rand() < 0.8:
-    #         new_text += word + ' '
-    #     else:
-    #         new_text += word + ' ' * np.random.randint(1, 5)
-
-    # return new_text.strip()
-
+    space_idx = [idx for idx, c in enumerate(text) if c == ' ']
+    if len(space_idx) > 0 and np.random.rand() < 0.25:
+        idx2replace = np.random.choice(space_idx)
+        num_space = np.random.randint(1, 6)
+        text = text[:idx2replace] + ' ' * num_space + text[idx2replace+1:]
     return text
 
 def split_text(text, factor=0.5):
@@ -515,7 +511,7 @@ def get_text_height(text, font=None):
     return max
 
 def get_num_char(text):
-    # return number of alphabets in text
+    # return number of alsphabets in text
     return len([c for c in text if c.isalpha() or c.isdigit()])
 
 def widen_box(xmin, ymin, xmax, ymax, factor=1.15, cut=True, size = None):     

@@ -92,7 +92,7 @@ class Phone(SubModule):
 class Fax(SubModule):
     def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob = 0, ink=None):
         # content = '' if np.random.random() < 0.5 else '+'
-        # for i in range(14):
+        # for i in range(14):an
         #     prob = np.random.random()
         #     if prob < 0.1: content += ' '
         #     elif 0.1 <= prob < 0.2: content += '-'
