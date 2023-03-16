@@ -143,8 +143,8 @@ def init_party(font_size, fbold_prob = 0.15, fitalic_prob = 0.05):
     company_name = CompanyName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
     company_address = Company_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
     phone = Phone(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
-    fax = Fax(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
-    tax = Tax(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
+    fax = Fax(rand_font(), rand_font(), marker_prob=1, down_prob = 0)()
+    tax = Tax(rand_font(), rand_font(), marker_prob=1, down_prob = 0)()
     reprenented_name = RepresentedBy(rand_font(), rand_font(), marker_prob=0.8, down_prob=0.0)()
     bank_name = BankName(rand_font(), rand_font(),marker_prob=0.7, down_prob=0)()
     bank_address = Bank_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
@@ -152,7 +152,7 @@ def init_party(font_size, fbold_prob = 0.15, fitalic_prob = 0.05):
     account_name = AccountName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
     swift_code = SwiftCode(rand_font(), rand_font(), marker_prob=1, down_prob=0)()
     
-    party = Party(skip_prob=0.1, down_prob=0.6, bank_prob=0.8)
+    party = Party(skip_prob = 0.1, down_prob = 0.6, bank_prob = 0.8)
     party(company_name, company_address, phone, fax, tax, reprenented_name,
             bank_name, bank_address, account_number,
             account_name, swift_code)

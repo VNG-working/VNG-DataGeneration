@@ -7,7 +7,7 @@ import numpy as np
 
 '''
 All submodule: company_name, company_address, phone, fax, tax, 
-reprenented_name, represented_position, bank_name, bank_address, account_number,
+reprenented_name, bank_name, bank_address, account_number,
 account_name, swift_code 
 '''
 
