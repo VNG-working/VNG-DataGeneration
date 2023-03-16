@@ -14,13 +14,13 @@ from PIL import ImageEnhance
 class SubModule:
     def __init__(self, shape = [1000, 1000], marker_prob = 0.5, down_prob=0.2,
                  marker_font:ImageFont.truetype = None, content_font:ImageFont.truetype = None,
-                 markers = [], content = None, label = None, ink = None, augment_prob = 0.5):
+                 markers = [], content = None, label = None, ink = None, augment_prob = 0.5, allow_random_capitalize = True):
         self.canvas =  np.full(shape + (3,), 255, dtype=np.uint8)
         self.canvas = Image.fromarray(self.canvas)
         self.fields = []
         self.markers = markers
         self.content = content
-        self.marker_prob = marker_prob
+        self.has_marker = np.random.rand() < marker_prob
         self.down_prob = down_prob
         self.in_module_position = (0, 0)
         self.marker_font = marker_font
@@ -31,6 +31,7 @@ class SubModule:
         self.ink = ink
         self.default_font_size = 20
         self.augment_prob = augment_prob
+        self.allow_random_capitalize = allow_random_capitalize
 
     def get_shape(self):
         return self.canvas.shape[:2]
@@ -39,7 +40,7 @@ class SubModule:
         text = ""
         flag = np.random.choice([1, 2, 3])
 
-        if np.random.rand() < self.marker_prob:
+        if self.has_marker:
             marker_text = np.random.choice(self.markers)
             marker_text = random_space(marker_text)
             marker_text = random_capitalize(marker_text)
@@ -56,12 +57,13 @@ class SubModule:
 
         # actual name
         content_text = np.random.choice(self.content)
-        content_text = random_capitalize(content_text)
+        if self.allow_random_capitalize:
+            content_text = random_capitalize(content_text)
         content_text = random_space(content_text)
         if flag == 3 and text != '':
             content_text = ' :' + content_text
 
-        if np.random.rand() > self.down_prob or len(content_text.split()) < 3:
+        if np.random.rand() > self.down_prob or len(content_text.split()) < 6 or get_num_char(content_text) < 25:
             # write account name
             self.cursor[0] += self.marker_font.getsize(text)[0]
             self.write(content_text, self.content_font, bold=np.random.choice([False, True]))
@@ -69,7 +71,11 @@ class SubModule:
             self.get_field_coord(content_text, [content_text], [self.label], self.content_font)
         else:
             # write account name
-            part1, part2 = split_text(content_text)
+            ls_parts = split_text(content_text)
+            if len(ls_parts) == 2:
+                part1, part2 = ls_parts
+            else:
+                part1, part2 = ls_parts[0], ''
             ## part 1
             self.cursor[0] += self.marker_font.getsize(text)[0]
             self.cursor[1] += np.random.randint(-5, 2)

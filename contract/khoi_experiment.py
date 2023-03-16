@@ -37,9 +37,13 @@ def blend_white(img, position, blank_shape):
     '''
     x, y = position
     h, w = blank_shape
-    blank = np.full(blank_shape + (3,), 255, dtype='uint8')
     cx, cy = x + w//2, y + h//2
     # img = cv2.seamlessClone(blank, img, mask=None, p=(cx, cy), flags=cv2.MONOCHROME_TRANSFER)
+
+    idxs = np.where(cv2.cvtColor(img, cv2.COLOR_BGR2RGB) > 200)
+    color = np.mean(img[idxs[0], idxs[1]], 0)
+    color = [int(c) for c in color]
+    blank = np.full(blank_shape + (3,), color, dtype='uint8')
 
     # pil blend
     img = Image.fromarray(img).convert('RGBA')
@@ -140,20 +144,23 @@ def init_party(font_size, fbold_prob = 0.15, fitalic_prob = 0.05):
         else:
             return font_normal
 
-    company_name = CompanyName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
+    company_name = CompanyName(rand_font(), rand_font(), marker_prob=0.8, down_prob=0.2)()
     company_address = Company_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
     phone = Phone(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
     fax = Fax(rand_font(), rand_font(), marker_prob=1, down_prob = 0)()
     tax = Tax(rand_font(), rand_font(), marker_prob=1, down_prob = 0)()
-    reprenented_name = RepresentedBy(rand_font(), rand_font(), marker_prob=0.8, down_prob=0.0)()
-    bank_name = BankName(rand_font(), rand_font(),marker_prob=0.7, down_prob=0)()
+    represented_name = RepresentedBy(rand_font(), rand_font(), marker_prob=1, down_prob=0.0)()
+    bank_name = BankName(rand_font(), rand_font(),marker_prob=0.5, down_prob=0)()
     bank_address = Bank_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
     account_number = AccountNumber(rand_font(), rand_font(), marker_prob=1)()
-    account_name = AccountName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
-    swift_code = SwiftCode(rand_font(), rand_font(), marker_prob=1, down_prob=0)()
+    account_name = AccountName(rand_font(), rand_font(), marker_prob=1, down_prob=0.2)()
+
+    swift_code = SwiftCode(rand_font(), rand_font(), marker_prob=1, down_prob=0)
+    swift_code.allow_random_capitalize = False
+    swift_code()
     
     party = Party(skip_prob = 0.1, down_prob = 0.6, bank_prob = 0.8)
-    party(company_name, company_address, phone, fax, tax, reprenented_name,
+    party(company_name, company_address, phone, fax, tax, represented_name,
             bank_name, bank_address, account_number,
             account_name, swift_code)
     
@@ -179,15 +186,15 @@ def init_bank(font_size):
 
 if __name__ == '__main__':
     from time import time
-    gener = ImageGen('/home/asus/Downloads/block_to_image/backgrounds')
-    save_path = os.getcwd() + "/khoi_test"
+    gener = ImageGen('/home/fiores/Downloads/backgrounds')
+    save_path = os.getcwd() + "contract/result/"
     os.makedirs(save_path, exist_ok=True)
     view = False
     save = True
     
     # field['box'] = [x1, y1, x2, y2, x3, y3, x4, y4]
     # block = [xmin, ymin, xmax, ymax]
-    for i in range(1):
+    for i in range(100):
         try:
             s = time()
             gener.reset()

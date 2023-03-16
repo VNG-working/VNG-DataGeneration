@@ -59,34 +59,65 @@ class Bank_Address(SubModule):
 
 class Phone(SubModule):
     def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob = 0, ink=None):
-        content = '' if np.random.random() < 0.5 else '+'
-        for i in range(14):
-            prob = np.random.random()
-            if prob < 0.1: content += ' '
-            elif 0.1 <= prob < 0.2: content += '-'
-            elif 0.2 <= prob < 0.3: content += '('
-            elif 0.3 <= prob < 0.4: content += ')'
-            else:
-                content += str(randint(0, 10))
+        # content = '' if np.random.random() < 0.5 else '+'
+        # for i in range(14):
+        #     prob = np.random.random()
+        #     if prob < 0.1: content += ' '
+        #     elif 0.1 <= prob < 0.2: content += '-'
+        #     elif 0.2 <= prob < 0.3: content += '('
+        #     elif 0.3 <= prob < 0.4: content += ')'
+        #     else:
+        #         content += str(randint(0, 10))
+        # content = ["".join(content)]
 
-        content = ["".join(content)]
+        content = random_number(randint(7, 11))
+        if np.random.rand() < 0.5:
+            content = '+' + content
+        if np.random.rand() < 0.8:
+            idx = np.random.randint(0, len(content)-2)
+            content = content[:idx] + '(' + content[idx:]
+            idx = np.random.randint(idx+2, len(content)-1)
+            content = content[:idx] + ')' + content[idx:]
+        if np.random.rand() < 0.8:
+            # randomly insert '.' or '-' at 2-3 random positions
+            char2insert = np.random.choice(['.', '-', ' '])
+            pos2insert = np.random.choice(list(range(1, len(content)-1)), np.random.choice([2, 3]), replace=False)
+            for pos in pos2insert:
+                content = content[:pos] + char2insert + content[pos:]
+        content = [content]
+
         markers = ['Tel', 'Tel No', 'Tel Number', 'Telephone', 'Phone/ Điện thoại', 'Phone', 'City Tel', 'Mobile']
-        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font,
-         markers, content, 'phone', ink)
+        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'phone', ink)
 
 class Fax(SubModule):
     def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob = 0, ink=None):
-        content = '' if np.random.random() < 0.5 else '+'
-        for i in range(14):
-            prob = np.random.random()
-            if prob < 0.1: content += ' '
-            elif 0.1 <= prob < 0.2: content += '-'
-            elif 0.2 <= prob < 0.3: content += '('
-            elif 0.3 <= prob < 0.4: content += ')'
-            else:
-                content += str(randint(0, 10))
+        # content = '' if np.random.random() < 0.5 else '+'
+        # for i in range(14):
+        #     prob = np.random.random()
+        #     if prob < 0.1: content += ' '
+        #     elif 0.1 <= prob < 0.2: content += '-'
+        #     elif 0.2 <= prob < 0.3: content += '('
+        #     elif 0.3 <= prob < 0.4: content += ')'
+        #     else:
+        #         content += str(randint(0, 10))
+        # content = ["".join(content)]
 
-        content = ["".join(content)]
+        content = random_number(randint(6, 11))
+        if np.random.rand() < 0.5:
+            content = '+' + content
+        if np.random.rand() < 0.8:
+            idx = np.random.randint(0, len(content)-2)
+            content = content[:idx] + '(' + content[idx:]
+            idx = np.random.randint(idx+2, len(content)-1)
+            content = content[:idx] + ')' + content[idx:]
+        if np.random.rand() < 0.8:
+            # randomly insert '.' or '-' at 2-3 random positions
+            char2insert = np.random.choice(['.', '-', ' '])
+            pos2insert = np.random.choice(list(range(1, len(content)-1)), np.random.choice([2, 3]), replace=False)
+            for pos in pos2insert:
+                content = content[:pos] + char2insert + content[pos:]
+        content = [content]
+
         markers = ['Fax', 'Fax No']
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font,
          markers, content, 'fax', ink)
@@ -96,16 +127,30 @@ class Tax(SubModule):
         content = [random_number(10)]
         markers = ['Tax', 'Tax code']
         
-        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font,
-         markers, content, 'tax', ink)
+        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'tax', ink)
 
 class AccountNumber(SubModule):
     def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob = 0, ink=None):
         
-        markers=["Account", "A/C No"]
+        markers=["Account", "A/C No", 'A/c #', 'A/c No VND', 'A/c No USD', 'ACCOUNT NO', 'ACCOUNT NUMBER', 'USD A/C No', 'VND A/C No', 'A/C']
        
-        content = [random_number(10)]
+        content = random_number(randint(6, 10))
+        if np.random.rand() < 0.6:
+            # randomly insert ' ' or '-' at 2-3 random positions
+            char2insert = np.random.choice(['-', ' '])
+            pos2insert = np.random.choice(list(range(1, len(content)-1)), np.random.choice([2, 3]), replace=False)
+            for pos in pos2insert:
+                content = content[:pos] + char2insert + content[pos:]
+        if np.random.rand() < 0.2:
+            # random insert (USD) or (VND) at random position
+            char2insert = np.random.choice(['(USD)', '(VND)'])
+            pos2insert = np.random.choice(list(range(1, len(content))))
+            content = content[:pos2insert] + char2insert + content[pos2insert:]
+
+        content = [content]
+
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'account_number', ink)
+    
 
 class RepresentedBy(SubModule):
 
@@ -158,7 +203,6 @@ class SwiftCode(SubModule):
    
 class AccountName(SubModule):
     def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob=0.2, ink=None):
-
         
         markers = [
             'account name',
@@ -172,7 +216,6 @@ class AccountName(SubModule):
 
 class BankName(SubModule):
     def __init__(self, marker_font, content_font, marker_prob=1, down_prob=0.2, ink=None):
-
         markers = [
             'bank name',
             'bank\'s name',
@@ -181,26 +224,10 @@ class BankName(SubModule):
             'beneficiary banker\'s name',
             'beneficiary\'s bank',
             'at the bank',
-            'bank'
+            'bank',
+            'at'
         ]
-
-        content = all_content['en_bank_name'] if marker_prob > 0 or np.random.rand() < 0.5 else ['at' + el for el in all_content['en_bank_name']]
-
+        content = None
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'bank_name', ink)
-
-class RepresentedPosition(SubModule):
-    def __init__(self, marker_font, content_font, marker_prob=0.5, down_prob=0, ink=None):
-
-        markers = [
-            "Position",
-            "Represented Position",
-            "Represented by",
-            "Represented",
-            "Represented",
-            "Representative",
-            "Representator"
-        ]
-        content = all_content['pos']
-
-        super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'represented_position', ink)
+        self.content = all_content['en_bank_name'] if self.has_marker or np.random.rand() < 0.3 else ['at ' + el for el in all_content['en_bank_name']]
 

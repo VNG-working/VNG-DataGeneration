@@ -474,20 +474,22 @@ def random_capitalize(text):
     # else:
     #     return text
 
-    return np.random.choice([text.title(), text.upper(), text.capitalize()])
+    return np.random.choice([text.title(), text.upper()])
 
 def random_space(text):
     """
         randomly replace a space in text with 0-5 space
     """
-    new_text = ''
-    for word in text.split():
-        if np.random.randint(0, 2) == 1:
-            new_text += word + ' '
-        else:
-            new_text += word + ' ' * np.random.randint(0, 6)
+    # new_text = ''
+    # for word in text.split():
+    #     if np.random.rand() < 0.8:
+    #         new_text += word + ' '
+    #     else:
+    #         new_text += word + ' ' * np.random.randint(1, 5)
 
-    return new_text.strip()
+    # return new_text.strip()
+
+    return text
 
 def split_text(text, factor=0.5):
     """
@@ -511,6 +513,10 @@ def get_text_height(text, font=None):
             max = font.getsize(text[i])[1]
     
     return max
+
+def get_num_char(text):
+    # return number of alphabets in text
+    return len([c for c in text if c.isalpha() or c.isdigit()])
 
 def widen_box(xmin, ymin, xmax, ymax, factor=1.15, cut=True, size = None):     
     center = [(xmax + xmin) / 2, (ymax + ymin) / 2]
