@@ -187,7 +187,8 @@ if __name__ == '__main__':
     
     # field['box'] = [x1, y1, x2, y2, x3, y3, x4, y4]
     # block = [xmin, ymin, xmax, ymax]
-    for i in range(100):
+    i = 0
+    while i < 1000:
         try:
             s = time()
             gener.reset()
@@ -242,6 +243,7 @@ if __name__ == '__main__':
                 to_xml(os.path.join(save_path, prefix + '.xml'), prefix+'.jpg', blocks, ['partyA', 'partyB', 'bank'], img.shape[:2])
                 cv2.imwrite(os.path.join(save_path, prefix + '.jpg'), img)
                 print(time() - s)
+                i += 1
 
         except Exception as e:
             # raise e 

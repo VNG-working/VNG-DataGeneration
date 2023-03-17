@@ -462,7 +462,7 @@ def rotate_bound(image, angle, pts=[[0.01, 0.01], [0.99, 0.01], [0.99, 0.99], [0
     # return lại ảnh đã rotate
     return cv2.warpAffine(image, M, (nW, nH), borderValue=(255, 255, 255)), transformed_points
     
-def random_capitalize(text):
+def random_capitalize(text, p):
     # type = np.random.randint(0, 4)
     # if type == 1:
     #     pass
@@ -474,7 +474,7 @@ def random_capitalize(text):
     # else:
     #     return text
 
-    return np.random.choice([text.title(), text.upper()])
+    return np.random.choice([text.title(), text.upper(), text], p=p)
 
 def random_space(text):
     """

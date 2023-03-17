@@ -30,7 +30,11 @@ comname_markers = [
     'PARTY A',
     'PARTY B',
     'SELLER',
-    'BUYER'
+    'BUYER',
+    'BETWEEN',
+    'AND',
+    'PARTY A (SELLER)',
+    'PARTY B (BUYER)',
 ]
 
 comname_content = all_content['vn_com_name'] + all_content["en_com_name_abrre"]
@@ -194,6 +198,7 @@ class SwiftCode(SubModule):
         markers = [
             'swift code',
             'swift',
+            'bank swift code'
         ]
 
         random_code = faker.swift() if np.random.rand() < 0.9 else faker.swift(length=11, primary=True)
