@@ -463,17 +463,6 @@ def rotate_bound(image, angle, pts=[[0.01, 0.01], [0.99, 0.01], [0.99, 0.99], [0
     return cv2.warpAffine(image, M, (nW, nH), borderValue=(255, 255, 255)), transformed_points
     
 def random_capitalize(text, p):
-    # type = np.random.randint(0, 4)
-    # if type == 1:
-    #     pass
-    #     return text.lower()
-    # elif type == 2:
-    #     return text.upper()
-    # elif type == 3:
-    #     return text.title()
-    # else:
-    #     return text
-
     return np.random.choice([text.title(), text.upper(), text], p=p)
 
 def random_space(text):
@@ -487,12 +476,13 @@ def random_space(text):
         text = text[:idx2replace] + ' ' * num_space + text[idx2replace+1:]
     return text
 
-def split_text(text, factor=0.5):
+def split_text(text, factor_range):
     """
         cut text randomly at at least <factor> * text_length index
     """
-    lowest = int(factor * len(text))
-    split_indices = [idx for idx, c in enumerate(text) if idx > lowest and c == ' ']
+    lowest = int(factor_range[0] * len(text))
+    highest = int(factor_range[1] * len(text))
+    split_indices = [idx for idx, c in enumerate(text) if highest > idx > lowest and c == ' ']
     if len(split_indices) == 0:
         return [text]
     else:
@@ -598,7 +588,7 @@ def mapping(boxes, position):
 def resize(new_shape, img, boxes):
     new_h, new_w = new_shape
     h, w = img.shape[:2]
-    scale_x, scale_y = new_w / h, new_h / h
+    scale_x, scale_y = new_w / w, new_h / h
     new_img = cv2.resize(img, (new_w, new_h))
     if isinstance(boxes, list):
         new_boxes = [[x1*scale_x, y1*scale_y, x2*scale_x, y2*scale_y] for (x1, y1, x2, y2) in boxes]

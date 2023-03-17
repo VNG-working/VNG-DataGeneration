@@ -9,6 +9,7 @@ import PIL.ImageFont as ImageFont
 import PIL.ImageDraw as ImageDraw
 import PIL.ImageFilter as ImageFilter
 from PIL import ImageEnhance
+import pdb
 
 
 class SubModule:
@@ -18,7 +19,7 @@ class SubModule:
                  random_capitalize_prob={
                         'marker': [0.5, 0.5, 0],
                         'content': [0.5, 0.5, 0]
-                 }):
+                 }, module_order_type = 'up|down'):
         self.canvas =  np.full(shape + (3,), 255, dtype=np.uint8)
         self.canvas = Image.fromarray(self.canvas)
         self.fields = []
@@ -36,6 +37,7 @@ class SubModule:
         self.default_font_size = 20
         self.augment_prob = augment_prob
         self.random_capitalize_prob = random_capitalize_prob
+        self.module_order_type = module_order_type
 
     def get_shape(self):
         return self.canvas.shape[:2]
@@ -66,13 +68,19 @@ class SubModule:
         if flag == 3 and text != '':
             content_text = ' :' + content_text
 
-        if np.random.rand() > self.down_prob or len(content_text.split()) < 6 or get_num_char(content_text) < 25:
+        is_down = False
+        if self.module_order_type == 'left|right' and get_num_char(content_text) > 25:
+            is_down = True
+        elif np.random.rand() > self.down_prob or len(content_text.split()) < 6 or get_num_char(content_text) < 25:
+            is_down = False
+        else:
+            is_down = True
+        if not is_down:   # khong xuong dong
             self.cursor[0] += self.marker_font.getsize(text)[0]
             self.write(content_text, self.content_font, bold=np.random.choice([False, True]))
-
             self.get_field_coord(content_text, [content_text], [self.label], self.content_font)
         else:
-            ls_parts = split_text(content_text)
+            ls_parts = split_text(content_text, factor_range=[0.5, 1]) if self.module_order_type == 'up|down' else split_text(content_text, factor_range=[0.5, 0.7])
             if len(ls_parts) == 2:
                 part1, part2 = ls_parts
             else:
@@ -170,6 +178,10 @@ class SubModule:
             if self.ink is None:
                 self.ink = randink(bold=bold)
 
+            # pdb.set_trace()
+            # print(self.cursor)
+            # print(self.get_text_length(text = text, font = font))
+            # print(self.canvas.size)
             while self.cursor[0] + self.get_text_length(text = text, font = font)[0] > self.canvas.size[0]:
                 text = text[:-1]
 

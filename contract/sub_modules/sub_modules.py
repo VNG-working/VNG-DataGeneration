@@ -48,7 +48,7 @@ class CompanyName(SubModule):
 class Company_Address(SubModule):
     def __init__(self, marker_font, content_font, marker_prob=0.7, down_prob=0.2,  ink=None):
         markers=address_markers
-        content=address_content
+        content=address_content if np.random.rand() <  0.5 else [' ' * randint(3, 10) + el for el in address_content]  # truong address thuong co mot khoang trong rat lon o dau
         super().__init__(SHAPE, marker_prob, down_prob, marker_font, content_font, markers, content, 'company_address', ink)
 
 class Bank_Address(SubModule):
