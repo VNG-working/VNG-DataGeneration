@@ -141,7 +141,7 @@ class ImageGen:
             position_x = None
             for module in party_modules:
                 block_h, block_w = module.get_shape()
-                mark_h = randint(start_h+10, start_h + 50)  # 2 module lien tip chi cach nhau mot chut
+                mark_h = randint(start_h+20, start_h + 40)  # 2 module lien tip chi cach nhau mot chut
                 # get region to paste
                 x1, y1, x2, y2 = self.find_region_to_paste(start_h, mark_h, block_h, background)
                 # paste white part to background
@@ -278,7 +278,7 @@ if __name__ == '__main__':
     
     parser.add_argument('--bg_path', type = str, default='/home/fiores/Downloads/backgrounds',
                         help='Backgound path')
-    parser.add_argument('--count', type = int, default=10,
+    parser.add_argument('--count', type = int, default=100,
                         help='Number of generated images')
     args = parser.parse_args()
 
@@ -291,7 +291,8 @@ if __name__ == '__main__':
     # field['box'] = [x1, y1, x2, y2, x3, y3, x4, y4]
     # block = [xmin, ymin, xmax, ymax]
     i = 0
-    while i < args.count:
+    print(args.count)
+    while i < 100:
         try:
             s = time()
             gener.reset()

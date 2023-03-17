@@ -13,13 +13,13 @@ account_name, swift_code
 '''
 
 class Party(Module):
-    def __init__(self, skip_prob:float = 0.2, down_prob:float = 0.7, bank_prob = 0.8, font_size = None, order_type='up|down'):
+    def __init__(self, skip_prob:float = 0.3, down_prob:float = 0.7, bank_prob = 0.7, font_size = None, order_type='up|down'):
         self.skip_prob = skip_prob
         self.down_prob = down_prob
         self.bank_prob = bank_prob
         self.order_type = order_type
         self.font_size = font_size
-        self.step_down = np.random.randint(5, 20)
+        self.step_down = np.random.randint(7, 16)
         super().__init__()
 
         self.initialize_components()    
@@ -29,35 +29,64 @@ class Party(Module):
         font_normal, font_bold, font_italic = font.get_font('normal'), font.get_font('bold'), font.get_font('italic')
         fbold_prob = 0.1
         fitalic_prob = 0.05
-        def rand_font():
+        def rand_font(bold_prob=fbold_prob, italic_prob=fitalic_prob):
             return np.random.choice([font_normal, font_bold, font_italic], p=[1-fbold_prob-fitalic_prob, fbold_prob, fitalic_prob])
 
-        company_name = CompanyName(rand_font(), rand_font(), marker_prob=0.8, down_prob=0.2)
+        # company name
+        company_name = CompanyName(rand_font(bold_prob=0.7), rand_font(bold_prob=0.9), marker_prob=0.8, down_prob=0.2)
         company_name.module_order_type = self.order_type
+        company_name.random_capitalize_prob = {
+            'marker': [0.2, 0.7, 0.1],  # marker cua buyer/seller ra it khi khong viet hoa
+            'content': [0.1, 0.8, 0.1]  # content cua buyer/seller ra it khi khong viet hoa
+        }
         company_name()
 
         company_address = Company_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)
         company_address.module_order_type = self.order_type
+        company_address.random_capitalize_prob = {
+            'marker': [0.4, 0.5, 0.1],
+            'content': [0.4, 0.5, 0.1]
+        }
         company_address()
 
         phone = Phone(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
         fax = Fax(rand_font(), rand_font(), marker_prob=1, down_prob = 0)()
         tax = Tax(rand_font(), rand_font(), marker_prob=1, down_prob = 0)()
-        represented_name = RepresentedBy(rand_font(), rand_font(), marker_prob=1, down_prob=0.0)()
+
+        represented_name = RepresentedBy(rand_font(), rand_font(bold_prob=0.3), marker_prob=1, down_prob=0.0)
+        represented_name.random_capitalize_prob = {
+            'marker': [0.7, 0.3, 0],  
+            'content': [0.7, 0.3, 0]  
+        }
+        represented_name()
 
         bank_name = BankName(rand_font(), rand_font(),marker_prob=0.5, down_prob=0)
         bank_name.module_order_type = self.order_type
+        bank_name.random_capitalize_prob = {
+            'marker': [0.5, 0.5, 0],  
+            'content': [0.2, 0.8, 0]  
+        }
         bank_name()
 
         bank_address = Bank_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)
         bank_address.module_order_type = self.order_type
         bank_address()
 
-        account_number = AccountNumber(rand_font(), rand_font(), marker_prob=1)()
+        account_number = AccountNumber(rand_font(), rand_font(), marker_prob=1)
+        account_number()
+
         account_name = AccountName(rand_font(), rand_font(), marker_prob=1, down_prob=0.2)()
+        account_name.random_capitalize_prob = {
+            'marker': [0.6, 0.4, 0],  
+            'content': [0.2, 0.8, 0]
+        }
 
         swift_code = SwiftCode(rand_font(), rand_font(), marker_prob=1, down_prob=0)
         swift_code.allow_random_capitalize = False
+        swift_code.random_capitalize_prob = {
+            'marker': [0.6, 0.4, 0],  
+            'content': [0, 1, 0]  
+        }
         swift_code()
 
         self.list_submodules = [company_name, company_address, phone, fax, tax, represented_name, bank_name, bank_address, account_number, account_name, swift_code]
@@ -76,6 +105,7 @@ class Party(Module):
             # cursor[1] = cursor[1] #max(cursor[1] + randint(-5, 5), 2) #x2, y1
         return cursor
         
+
     def __call__(self):
         company_name, company_address, phone, fax, tax, represented_name, \
                 bank_name, bank_address, account_number, account_name, swift_code = self.list_submodules
@@ -115,13 +145,22 @@ class Party(Module):
         if np.random.random() < self.bank_prob:
             cursor = self.update_cursor(cursor, submodule, 'reset_down')  # reset cursor
             type = np.random.choice([1, 2]) if bank_name.has_marker else 2  # neu bank_name ko co marker, no phai nam cung dong voi account_name hoac nam ngay duoi
-            bank_skip_prob_dict = {
-                'BankName': 0,
-                'Bank_Address': 0.3,
-                'AccountNumber': 0,
-                'AccountName': 0.7,
-                'SwiftCode': 0.3
-            }
+            if self.order_type == 'up|down':
+                bank_skip_prob_dict = {
+                    'BankName': 0,
+                    'Bank_Address': 0.3,
+                    'AccountNumber': 0,
+                    'AccountName': 0.7,
+                    'SwiftCode': 0.3
+                }
+            else:
+                bank_skip_prob_dict = {
+                    'BankName': 0,
+                    'Bank_Address': 0.6,
+                    'AccountNumber': 0,
+                    'AccountName': 0.9,
+                    'SwiftCode': 0.3
+                }
             ls_submodules = [bank_name, bank_address, account_number, account_name, swift_code]
             if type == 1: # moi field 1 dong
                 if np.random.rand() < 0.2:

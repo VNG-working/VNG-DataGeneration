@@ -17,8 +17,8 @@ class SubModule:
                  marker_font:ImageFont.truetype = None, content_font:ImageFont.truetype = None,
                  markers = [], content = None, label = None, ink = None, augment_prob = 0.5,
                  random_capitalize_prob={
-                        'marker': [0.5, 0.5, 0],
-                        'content': [0.5, 0.5, 0]
+                        'marker': [0.7, 0.25, 0.05],
+                        'content': [0.6, 0.3, 0.1]
                  }, module_order_type = 'up|down'):
         self.canvas =  np.full(shape + (3,), 255, dtype=np.uint8)
         self.canvas = Image.fromarray(self.canvas)
