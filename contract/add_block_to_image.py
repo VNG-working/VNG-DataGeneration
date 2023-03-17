@@ -7,6 +7,7 @@ from party import Party
 from bank import Bank
 from common import *
 import pdb
+import argparse
 
 def blend(module, background, position):
     '''
@@ -179,7 +180,17 @@ def init_bank(font_size):
 
 if __name__ == '__main__':
     from time import time
-    gener = ImageGen('/home/fiores/Downloads/backgrounds')
+
+    parser = argparse.ArgumentParser(
+                    prog='ContractGen',
+                    description='',
+                    epilog='')
+    
+    parser.add_argument('--bg_path', default='/home/fiores/Downloads/backgrounds',
+                        help='Backgound path')
+    args = parser.parse_args()
+
+    gener = ImageGen(args.bg_path)
     save_path = os.getcwd() + "contract/result/"
     os.makedirs(save_path, exist_ok=True)
     view = False
