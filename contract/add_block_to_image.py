@@ -291,8 +291,7 @@ if __name__ == '__main__':
     # field['box'] = [x1, y1, x2, y2, x3, y3, x4, y4]
     # block = [xmin, ymin, xmax, ymax]
     i = 0
-    print(args.count)
-    while i < 100:
+    while i < args.count:
         try:
             s = time()
             gener.reset()
