@@ -35,7 +35,7 @@ with open(raw_vn_per_name_path, "r", encoding="utf-8") as f:
     vn_per_name = [x[:-1] for x in f.readlines(hint_test)]
 
 with open(position_path, "r", encoding="utf-8") as f:
-    pos = [x[:-1] for x in f.readlines(hint_test)]
+    pos = [x[:-1] for x in f.readlines(hint_test) if len(x.split(" ")) < 3]
 
 content = {
     "en_bank_name" : bank_names,

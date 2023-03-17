@@ -276,8 +276,10 @@ if __name__ == '__main__':
                     description='',
                     epilog='')
     
-    parser.add_argument('--bg_path', default='/home/fiores/Downloads/backgrounds',
+    parser.add_argument('--bg_path', type = str, default='/home/fiores/Downloads/backgrounds',
                         help='Backgound path')
+    parser.add_argument('--count', type = int, default=10,
+                        help='Number of generated images')
     args = parser.parse_args()
 
     gener = ImageGen(args.bg_path)
@@ -289,7 +291,7 @@ if __name__ == '__main__':
     # field['box'] = [x1, y1, x2, y2, x3, y3, x4, y4]
     # block = [xmin, ymin, xmax, ymax]
     i = 0
-    while i < 1000:
+    while i < args.count:
         try:
             s = time()
             gener.reset()

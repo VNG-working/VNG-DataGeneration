@@ -21,7 +21,7 @@ address_markers = [
     'ADDRESS'
 ]
 
-address_content = all_content['vn_unsign_add'] + all_content['en_com_add']
+address_content = all_content['en_com_add']
 
 comname_markers = [
     'Company Name',
