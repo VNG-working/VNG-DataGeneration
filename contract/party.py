@@ -13,13 +13,56 @@ account_name, swift_code
 '''
 
 class Party(Module):
-    def __init__(self, skip_prob:float = 0.2, down_prob:float = 0.7, bank_prob = 0.8):
+    def __init__(self, skip_prob:float = 0.2, down_prob:float = 0.7, bank_prob = 0.8, font_size = None, order_type='up|down'):
         self.skip_prob = skip_prob
         self.down_prob = down_prob
         self.bank_prob = bank_prob
+        self.order_type = order_type
+        self.font_size = font_size
         self.step_down = np.random.randint(5, 20)
         super().__init__()
-    
+
+        self.initialize_components()    
+
+    def initialize_components(self):
+        font = Font(font_scale=self.font_size)
+        font_normal, font_bold, font_italic = font.get_font('normal'), font.get_font('bold'), font.get_font('italic')
+        fbold_prob = 0.1
+        fitalic_prob = 0.05
+        def rand_font():
+            return np.random.choice([font_normal, font_bold, font_italic], p=[1-fbold_prob-fitalic_prob, fbold_prob, fitalic_prob])
+
+        company_name = CompanyName(rand_font(), rand_font(), marker_prob=0.8, down_prob=0.2)
+        company_name.module_order_type = self.order_type
+        company_name()
+
+        company_address = Company_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)
+        company_address.module_order_type = self.order_type
+        company_address()
+
+        phone = Phone(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
+        fax = Fax(rand_font(), rand_font(), marker_prob=1, down_prob = 0)()
+        tax = Tax(rand_font(), rand_font(), marker_prob=1, down_prob = 0)()
+        represented_name = RepresentedBy(rand_font(), rand_font(), marker_prob=1, down_prob=0.0)()
+
+        bank_name = BankName(rand_font(), rand_font(),marker_prob=0.5, down_prob=0)
+        bank_name.module_order_type = self.order_type
+        bank_name()
+
+        bank_address = Bank_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)
+        bank_address.module_order_type = self.order_type
+        bank_address()
+
+        account_number = AccountNumber(rand_font(), rand_font(), marker_prob=1)()
+        account_name = AccountName(rand_font(), rand_font(), marker_prob=1, down_prob=0.2)()
+
+        swift_code = SwiftCode(rand_font(), rand_font(), marker_prob=1, down_prob=0)
+        swift_code.allow_random_capitalize = False
+        swift_code()
+
+        self.list_submodules = [company_name, company_address, phone, fax, tax, represented_name, bank_name, bank_address, account_number, account_name, swift_code]
+
+
     def update_cursor(self, cursor, submodule, direction='down'):
         h, w = submodule.get_shape()
         if direction == 'down':
@@ -33,9 +76,10 @@ class Party(Module):
             # cursor[1] = cursor[1] #max(cursor[1] + randint(-5, 5), 2) #x2, y1
         return cursor
         
-    def __call__(self, company_name, company_address, phone, fax, tax, represented_name, 
-                bank_name, bank_address, account_number, account_name, swift_code):
-            
+    def __call__(self):
+        company_name, company_address, phone, fax, tax, represented_name, \
+                bank_name, bank_address, account_number, account_name, swift_code = self.list_submodules
+        
         right_flag = False
         #Paste company name and company_address_first
         cursor = [10, 10] # x1, y1, x2, y2
@@ -52,23 +96,26 @@ class Party(Module):
         for i, submodule in enumerate(list_submodules):
             if np.random.random() < self.skip_prob: # skip component
                 continue
-    
+
             self.__paste__(submodule, position=cursor)
-            if right_flag: #next component must be down line
-                cursor = self.update_cursor(cursor, submodule, 'reset_down')
-                right_flag = False
-            else:
-                if np.random.random() < self.down_prob: # Still downline
-                    cursor = self.update_cursor(cursor, submodule, 'down')
+
+            if i!= len(list_submodules) - 1:
+                if right_flag: #next component must be down line
+                    cursor = self.update_cursor(cursor, submodule, 'reset_down')
                     right_flag = False
                 else:
-                    cursor = self.update_cursor(cursor, submodule, 'right')
-                    right_flag = True
+                    if np.random.random() < self.down_prob: # Still downline
+                        cursor = self.update_cursor(cursor, submodule, 'down')
+                        right_flag = False
+                    else:
+                        cursor = self.update_cursor(cursor, submodule, 'right')
+                        right_flag = True
         
         # Bank info
         if np.random.random() < self.bank_prob:
+            cursor = self.update_cursor(cursor, submodule, 'reset_down')  # reset cursor
             type = np.random.choice([1, 2]) if bank_name.has_marker else 2  # neu bank_name ko co marker, no phai nam cung dong voi account_name hoac nam ngay duoi
-            skip_prob_dict = {
+            bank_skip_prob_dict = {
                 'BankName': 0,
                 'Bank_Address': 0.3,
                 'AccountNumber': 0,
@@ -80,7 +127,7 @@ class Party(Module):
                 if np.random.rand() < 0.2:
                     np.random.shuffle(ls_submodules)
                 for submodule in ls_submodules:
-                    if np.random.rand() < skip_prob_dict[submodule.__class__.__name__]:
+                    if np.random.rand() < bank_skip_prob_dict[submodule.__class__.__name__]:
                         continue
                     self.__paste__(submodule, position=cursor)
                     cursor = self.update_cursor(cursor, submodule, 'down')
@@ -96,7 +143,7 @@ class Party(Module):
                 is_submodule_pair_pasted = False
 
                 for submodule in ls_submodules:
-                    if np.random.rand() < skip_prob_dict[submodule.__class__.__name__]:
+                    if np.random.rand() < bank_skip_prob_dict[submodule.__class__.__name__]:
                         continue
                     if submodule not in submodule_pair:
                         self.__paste__(submodule, position=cursor)
@@ -116,32 +163,9 @@ class Party(Module):
         for i, sub in enumerate(self.submodules):
             x1, y1, x2, y2 = sub['box']
             self.canvas[y1:y2, x1:x2] = sub['submodule'].canvas
-            
-# def init_party(font_size):
-#     font = Font(font_scale=font_size)
-#     font_normal, font_bold, font_italic = font.get_font('normal'), font.get_font('bold'), font.get_font('italic')
-#     def rand_font():
-#         return np.random.choice([font_normal, font_bold, font_italic])
 
-#     company_name = CompanyName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
-#     company_address = Company_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
-#     phone = Phone(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
-#     fax = Fax(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
-#     tax = Tax(rand_font(), rand_font(),marker_prob=1, down_prob = 0)()
-#     represented_name = RepresentedBy(rand_font(), rand_font(), marker_prob=0.8, down_prob=0.0)()
-#     represented_position = RepresentedPosition(rand_font(), rand_font(), marker_prob=0.3, down_prob=0.0)()
-#     bank_name = BankName(rand_font(), rand_font(),marker_prob=0.7, down_prob=0)()
-#     bank_address = Bank_Address(rand_font(), rand_font(),marker_prob=0.7, down_prob=0.2)()
-#     account_number = AccountNumber(rand_font(), rand_font(), marker_prob=1)()
-#     account_name = AccountName(rand_font(), rand_font(), marker_prob=0.7, down_prob=0.2)()
-#     swift_code = SwiftCode(rand_font(), rand_font(), marker_prob=1, down_prob=0)()
-    
-#     party = Party()
-#     party(company_name, company_address, phone, fax, tax, represented_name,
-#             represented_position, bank_name, bank_address, account_number,
-#             account_name, swift_code)
-    
-#     return party
+        return self
+            
 
 if __name__ == '__main__':
     import cv2
