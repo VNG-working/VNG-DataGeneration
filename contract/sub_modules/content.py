@@ -58,8 +58,3 @@ if __name__ == "__main__":
     print(choice(content["vn_com_name"]))
     print(choice(content["vn_per_name"]))
     print(choice(content["pos"]))
-
-    # for key in content:
-    #     f = open(os.getcwd() + f"/content/{key}.txt", "w")
-    #     f.writelines([f"{x}\n" for x in content[key]])
-    #     f.close()
