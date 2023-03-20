@@ -138,3 +138,6 @@ test.json
 */.DS_Store
 */result
 khoi_test/
+
+poc_training/
+poc_training_images/
