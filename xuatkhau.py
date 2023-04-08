@@ -27,8 +27,8 @@ class SHND(OfficialID):
         super().__init__(dst)
         # dst = 'data/test/'
         self.dst = dst
-        self.img_name = "xuatkhau_{}.jpg".format(np.random.randint(665527))
-        # self.img_name = "fake_test.jpg"
+        # self.img_name = "xuatkhau_{}.jpg".format(np.random.randint(665527))
+        self.img_name = "fake_test.jpg"
 
         self.font_scale = np.random.randint(32, 35)
         self.original_font_scale = self.font_scale
@@ -1642,7 +1642,52 @@ class SHND(OfficialID):
 
         self.write(text, char_font=self.bold, ink=randink(True))
         self.get_marker_coord(text, [raw_text], ["text"], self.bold)
+    
+    def post_bbox(self, diff_scale = 5):
+        path = self.dst + self.img_name
+        json_path = path[:-4] + ".json"
 
+        f = open(json_path, mode = "r")
+        data = json.load(f)
+
+        for shape in data["shapes"]:
+            old_point = np.array(shape["points"])
+
+            new_point = []
+
+            # xmin = old_point[0, 0]
+            # ymin = old_point[0, 1]
+            # xmax = old_point[2, 0]
+            # ymax = old_point[2, 1]
+
+            # if ymax - ymin > diff_scale * (xmax - xmin):
+            #     theta = np.radians(randint(5, 10))
+            # else:
+            #     theta = np.radians(randint(40, 45))
+
+            # c, s = np.cos(theta), np.sin(theta)
+            # R = np.array(((c, -s), (s, c)))
+
+            # center_point = np.array((xmax - xmin)/2, (ymax - ymin)/2)
+
+            # for sub_point in old_point:
+            #     norm_sub_point = sub_point - center_point
+
+            #     rotated_sub_point = np.matmul(R, norm_sub_point.T)
+
+            #     decoded_sub_point = rotated_sub_point + center_point
+
+            #     new_point.append([int(decoded_sub_point[1] + 1), int(decoded_sub_point[0])])
+
+            for sub_point in old_point:
+
+                new_point.append([sub_point[0].astype(np.int8) + randint(-30, 30), 
+                                  sub_point[1].astype(np.int8) + randint(-30, 30)])
+
+            shape["point"] = new_point
+        
+        with open(json_path, "w") as jsonFile:
+            json.dump(data, jsonFile)
 
     def fake(self):
         # self.fake_stamp()
@@ -1673,10 +1718,12 @@ class SHND(OfficialID):
 
         self.save()
 
+        self.post_bbox()
+
 
 if __name__ == '__main__':
     i = 0
-    while i < 1000:
+    while i < 1:
         print("_______________________________________________________________________________________________________________")
         try:
             faker = SHND(dst = os.getcwd() + "\\data_xuatkhau\\",

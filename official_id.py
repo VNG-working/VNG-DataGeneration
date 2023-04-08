@@ -679,11 +679,12 @@ class OfficialID:
 
 
             xmin, ymin, xmax, ymax = self.widen_box(bb[0], bb[1], bb[2], bb[3])
+
             _field = {}
-            _field["xmin"] = xmin
-            _field["ymin"] = ymin
-            _field["xmax"] = xmax
-            _field["ymax"] = ymax
+            _field["xmin"] = xmin - randint(5, 10)
+            _field["ymin"] = ymin - randint(1, 5)
+            _field["xmax"] = xmax + randint(1, 5)
+            _field["ymax"] = ymax + randint(9, 10)
             _field["type"] = fields_list[i]
             _field["text"] = u"{}".format(fields[i])
             _field["block_type"] = block_type
